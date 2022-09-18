@@ -1,0 +1,4 @@
+[MESSAGE CONTROL]
+disable = invalid-name, line-too-long, too-many-instance-attributes, no-name-in-module
+
+# duplicate-code, bad-continuation, missing-docstring, redefined-builtin, redefined-outer-name
