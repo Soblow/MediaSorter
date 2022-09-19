@@ -57,11 +57,11 @@ class ImageSorter(MainWindow):
         self.nonexist = False
         scrollAreaSize = (self.scrollArea.size()-QSize(50, 50)).expandedTo(QSize(50, 50))
         if len(self.mediaList) > 0:
-            currpath = self.mediaList[self.mediaListPosition]["path"]
+            currpath = self.mediaList[self.mediaListPosition].path
             if os.path.exists(currpath):
                 self.isActive = True
                 self.image.show()
-                isGif = (self.mediaList[self.mediaListPosition]["mime"] in fsUtils.ANIMATEDFORMATS)
+                isGif = (self.mediaList[self.mediaListPosition].mime in fsUtils.ANIMATEDFORMATS)
                 self.image.updateImage(currpath, scrollAreaSize, isGif)
                 self.setFileName(currpath)
                 self.image.rescale()

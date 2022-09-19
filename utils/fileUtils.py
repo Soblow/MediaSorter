@@ -11,6 +11,9 @@ import shutil
 from PyQt5.QtCore import QDir, QMimeDatabase
 from PyQt5.QtWidgets import QWidget, QFileDialog
 
+from utils.MediaEntry import MediaEntry
+from utils.UndoRedo import HistoryEntry
+
 ANIMATEDFORMATS = ["image/gif", "image/webp"]
 
 
@@ -18,7 +21,7 @@ def defaultFilters() -> set[str]:
     return {"image/png", "image/jpg"}
 
 
-def listFiles(path: str, matchingMime: list = None) -> list[dict]:
+def listFiles(path: str, matchingMime: list = None) -> list[MediaEntry]:
     filters = matchingMime
     if filters is None:
         filters = defaultFilters()
@@ -34,11 +37,14 @@ def listFiles(path: str, matchingMime: list = None) -> list[dict]:
     return result
 
 
-def indexFile(fileInfo: str, filters: list, db: QMimeDatabase) -> dict | None:
+def indexFile(fileInfo: str, filters: list, db: QMimeDatabase) -> MediaEntry | None:
     fileType = db.mimeTypeForFile(fileInfo).name()
     # magic.from_file(fullpath, mime=True)
     if fileType in filters:
-        return {"path": fileInfo, "mime": fileType}
+        media = MediaEntry()
+        media.path = fileInfo
+        media.mime = fileType
+        return media
     return None
 
 
@@ -48,7 +54,7 @@ def getRandomName(path: str) -> str:
     return splitText[0] + "-" + randomPath + splitText[1]
 
 
-def moveFile(original: str, newDirectory: str) -> dict | None:
+def moveFile(original: str, newDirectory: str) -> HistoryEntry | None:
     if not os.path.isdir(newDirectory):
         logging.warning("Destination (%s) doesn't exist", newDirectory)
         return None
@@ -64,10 +70,15 @@ def moveFile(original: str, newDirectory: str) -> dict | None:
         newFilename = newDirectory + "/" + randomName
     # Using shutil to work between FS if needed
     shutil.move(original, newFilename)
-    return {"action": "move", "oldpath": original, "newpath": newFilename}
+
+    hist = HistoryEntry()
+    hist.action = "move"
+    hist.oldPath = original
+    hist.newPath = newFilename
+    return hist
 
 
-def copyFile(original: str, newDirectory: str) -> dict | None:
+def copyFile(original: str, newDirectory: str) -> HistoryEntry | None:
     if not os.path.isdir(newDirectory):
         logging.warning("Destination (%s) doesn't exist", newDirectory)
         return None
@@ -83,16 +94,26 @@ def copyFile(original: str, newDirectory: str) -> dict | None:
         newFilename = os.path.join(newDirectory, randomName)
     # Using copy2 to preserve metadata
     shutil.copy2(original, newFilename)
-    return {"action": "copy", "oldpath": original, "newpath": newFilename}
+
+    hist = HistoryEntry()
+    hist.action = "copy"
+    hist.oldPath = original
+    hist.newPath = newFilename
+    return hist
 
 
-def deleteFile(original: str, newFilename: str) -> dict | None:
+def deleteFile(original: str, newFilename: str) -> HistoryEntry | None:
     if not os.path.exists(newFilename):
         logging.warning("File (%s) doesn't exist", newFilename)
         return None
     os.remove(newFilename)
     splitText = os.path.split(newFilename)
-    return {"action": "delete_copy", "oldpath": original, "newpath": splitText[0]}
+
+    hist = HistoryEntry()
+    hist.action = "delete_copy"
+    hist.oldPath = original
+    hist.newPath = splitText[0]
+    return hist
 
 
 def chooseDirectory(parent: QWidget) -> tuple[bool, str]:

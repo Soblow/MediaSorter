@@ -12,6 +12,7 @@ import time
 from PyQt5.QtCore import QMimeDatabase
 
 import utils.fileUtils as fsUtils
+from utils.MediaEntry import MediaEntry
 
 
 class AsyncDirectoryIndexer:
@@ -100,16 +101,14 @@ class AsyncDirectoryIndexer:
 
         return True
 
-    def get(self) -> dict | None:
+    def get(self) -> MediaEntry | None:
         if self.outputQueue.empty():
             return None
         a = self.outputQueue.get()
         self.indexedCount += 1
-        if a is None:
-            a = {}
         return a
 
-    def getBulk(self, maxItems: int = 5) -> list | None:
+    def getBulk(self, maxItems: int = 5) -> list[MediaEntry] | None:
         if self.outputQueue.empty():
             return None
         rez = []

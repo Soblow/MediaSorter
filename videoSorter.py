@@ -85,8 +85,8 @@ class VideoSorter(MainWindow):
         else:
             self.isActive = True
             self.videoWidget.show()
-            relPath = self.mediaList[self.mediaListPosition]["path"]
-            self.setFileName(self.mediaList[self.mediaListPosition]["path"])
+            relPath = self.mediaList[self.mediaListPosition].path
+            self.setFileName(self.mediaList[self.mediaListPosition].path)
             relPath = os.path.abspath(relPath)
             self.videoPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(relPath)))
             self.playButton.setEnabled(True)

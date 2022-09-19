@@ -1,13 +1,13 @@
 # TODO
 ## Vital
-- Reimplement undo/redo with objects
-- Create classes to represent most of dicts
+- Write a proper description in README.md
 
 ## Important
 - Similar to undo hide, allow putting back moved items to list
 - Add docstrings to functions
 - Current indexing method doesn't guarantee any order
 - Options menu (history size, main buttons...)
+- In-code TODOs
 
 ## Suggestions
 - Find a proper list of animated formats for imageSorter

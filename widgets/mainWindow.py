@@ -22,45 +22,47 @@ from PyQt5.QtWidgets import QMainWindow, \
 import utils.fileUtils as fsUtils
 import utils.AsyncDirectoryIndexer as AsyncDirectoryIndexer
 import utils.BindingsGlobals as BindingsGlobals
+from utils.MediaEntry import MediaEntry
+from utils.UndoRedo import HistoryEntry
 from widgets.QJumpWindow import QJumpWindow
 from widgets.bindingsWindow import BindingsWindow
 
 UNDOHISTORY = 20
 
 
-def doHistory(history: list, otherHistory: list, mediaList: list, mediaListPosition: int) -> tuple[str, int]:
+def doHistory(history: list[HistoryEntry], otherHistory: list[HistoryEntry], mediaList: list[MediaEntry], mediaListPosition: int) -> tuple[str, int]:
     act_msg = "no action"
     newPos = mediaListPosition
     if len(history) > 0:
         previousAction = history.pop()
         newAction = copy.deepcopy(previousAction)
         # if "oldPos" in previousAction:
-        #     newPos = previousAction["oldPos"]
+        #     newPos = previousAction.position
 
-        if previousAction["action"] == "move":
-            newAction = fsUtils.moveFile(previousAction["newpath"], os.path.split(previousAction["oldpath"])[0])
+        if previousAction.action == "move":
+            newAction = fsUtils.moveFile(previousAction.newPath, os.path.split(previousAction.oldPath)[0])
             if newAction is not None:
-                # newAction["entry"] = previousAction["entry"]
-                # newAction["oldPos"] = previousAction["oldPos"]
-                act_msg = "move "+previousAction["oldpath"]
-                # if os.path.exists(previousAction["entry"]["path"]):
-                #     mediaList.insert(previousAction["oldPos"], previousAction["entry"])
+                # newAction.entry = previousAction.entry
+                # newAction.position = previousAction.position
+                act_msg = "move "+previousAction.oldPath
+                # if os.path.exists(previousAction.entry["path"]):
+                #     mediaList.insert(previousAction.position, previousAction.entry)
                 # else:
                 #     mediaList.pop(mediaListPosition)
                 #     newPos = mediaListPosition
-        elif previousAction["action"] == "copy":
-            newAction = fsUtils.deleteFile(previousAction["oldpath"], previousAction["newpath"])
+        elif previousAction.action == "copy":
+            newAction = fsUtils.deleteFile(previousAction.oldPath, previousAction.newPath)
             if newAction is not None:
-                act_msg = "copy "+previousAction["oldpath"]
-        elif previousAction["action"] == "delete_copy":
-            newAction = fsUtils.copyFile(previousAction["oldpath"], previousAction["newpath"])
+                act_msg = "copy "+previousAction.oldPath
+        elif previousAction.action == "delete_copy":
+            newAction = fsUtils.copyFile(previousAction.oldPath, previousAction.newPath)
             if newAction is not None:
-                act_msg = "delete_copy "+previousAction["oldpath"]
-        elif previousAction["action"] == "hide":
+                act_msg = "delete_copy "+previousAction.oldPath
+        elif previousAction.action == "hide":
             newAction = None
-            act_msg = "hide "+previousAction["entry"]["path"]
-            mediaList.insert(previousAction["oldPos"], previousAction["entry"])
-            newPos = min(previousAction["oldPos"], len(mediaList)+1)
+            act_msg = "hide "+previousAction.entry.path
+            mediaList.insert(previousAction.position, previousAction.entry)
+            newPos = min(previousAction.position, len(mediaList)+1)
         if newAction is not None:
             otherHistory.append(newAction)
         if len(otherHistory) > UNDOHISTORY:
@@ -222,7 +224,7 @@ class MainWindow(QMainWindow):
         newEntries = self.asyncIndexer.getBulk(50)
         if newEntries and len(newEntries) > 0:
             flag = (len(self.mediaList) == 0)
-            self.mediaList += [e for e in newEntries if len(e) > 0]
+            self.mediaList += newEntries
             if flag:
                 self.updateCurrentMedia()
                 self.isActive = True
@@ -234,7 +236,7 @@ class MainWindow(QMainWindow):
             self.asyncIndexerTimer.stop()
             self.asyncIndexer.stopProcess()
 
-    def addNewUndo(self, action: dict):
+    def addNewUndo(self, action: HistoryEntry):
         self.redoHistory = []
         self.redoAction.setEnabled(False)
         self.undoHistory.append(action)
@@ -391,16 +393,16 @@ class MainWindow(QMainWindow):
 
     def actDelete(self):
         if self.isActive:
-            newDirectory = os.path.expanduser("~/.local/share/Trash/files")
+            newDirectory = os.path.expanduser("~/.local/share/Trash/files")  # TODO: Find a crossplatform alternative
             self.moveFile(newDirectory)
 
     def moveFile(self, newDirectory: str):
         if self.isActive:
             self.statusBar().showMessage(f"Moving file to {newDirectory}.")
-            newUndo = fsUtils.moveFile(self.mediaList[self.mediaListPosition]['path'], newDirectory)
+            newUndo = fsUtils.moveFile(self.mediaList[self.mediaListPosition].path, newDirectory)
             if newUndo is not None:
-                newUndo["oldPos"] = self.mediaListPosition
-                newUndo["entry"] = self.mediaList[self.mediaListPosition]
+                newUndo.position = self.mediaListPosition
+                newUndo.entry = self.mediaList[self.mediaListPosition]
                 self.addNewUndo(newUndo)
                 self.mediaList.pop(self.mediaListPosition)
                 self.next(move=False)
@@ -410,9 +412,9 @@ class MainWindow(QMainWindow):
     def copyFile(self, newDirectory: str):
         if self.isActive:
             self.statusBar().showMessage(f"Copying file to {newDirectory}.")
-            newUndo = fsUtils.copyFile(self.mediaList[self.mediaListPosition]['path'], newDirectory)
+            newUndo = fsUtils.copyFile(self.mediaList[self.mediaListPosition].path, newDirectory)
             if newUndo is not None:
-                newUndo["oldPos"] = self.mediaListPosition
+                newUndo.position = self.mediaListPosition
                 self.addNewUndo(newUndo)
             else:
                 self.statusBar().showMessage(f"Failed to copy file to {newDirectory}.")
@@ -420,7 +422,11 @@ class MainWindow(QMainWindow):
     def hideFile(self):
         if self.isActive or self.nonexist:
             self.statusBar().showMessage("Removing file from list.")
-            self.addNewUndo({"action": "hide", "entry": self.mediaList[self.mediaListPosition], "oldPos": self.mediaListPosition})
+            hist = HistoryEntry()
+            hist.action = "hide"
+            hist.entry = self.mediaList[self.mediaListPosition]
+            hist.position = self.mediaListPosition
+            self.addNewUndo(hist)
             self.mediaList.pop(self.mediaListPosition)
             self.next(move=False)
 
