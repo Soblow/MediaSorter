@@ -11,10 +11,10 @@ from PyQt5.QtCore import QCoreApplication, QSettings, Qt, QSize, QPoint
 from PyQt5.QtGui import QImageReader, QMouseEvent, QResizeEvent, QKeyEvent
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout
 
-from QConstantRatioImage import QConstantRatioImage
-from QNoWheeleventScrollArea import QNoWheeleventScrollArea
-from mainWindow import MainWindow
-import fileUtils as fsUtils
+from widgets.QConstantRatioImage import QConstantRatioImage
+from widgets.QNoWheeleventScrollArea import QNoWheeleventScrollArea
+from widgets.mainWindow import MainWindow
+import utils.fileUtils as fsUtils
 
 
 class ImageSorter(MainWindow):

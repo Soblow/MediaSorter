@@ -10,7 +10,7 @@ from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QPushButton, QWidget, QHeaderView, QAbstractItemView, \
     QAbstractScrollArea, QSizePolicy, QLabel
 
-from changeActionWidget import ChangeAction
+from widgets.changeActionWidget import ChangeAction
 
 
 class BindingsListWidget(QTableWidget):

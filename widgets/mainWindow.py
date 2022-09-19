@@ -13,17 +13,17 @@ import os
 import pickle
 import math
 
-from PyQt5.QtCore import Qt, pyqtSlot, QTimer, QPoint, QSize
+from PyQt5.QtCore import Qt, pyqtSlot, QTimer, QPoint
 from PyQt5.QtGui import QKeySequence, QGuiApplication, QWheelEvent, QKeyEvent
 from PyQt5.QtWidgets import QMainWindow, \
     QAction, QTableWidget, QAbstractItemView, QTableWidgetItem, QFileDialog, QSplitter, QVBoxLayout, QWidget, QLabel, \
     QSizePolicy, QHBoxLayout, QMessageBox
 
-import AsyncDirectoryIndexer
-import BindingsGlobals
-import fileUtils as fsUtils
-from QJumpWindow import QJumpWindow
-from bindingsWindow import BindingsWindow
+import utils.fileUtils as fsUtils
+import utils.AsyncDirectoryIndexer as AsyncDirectoryIndexer
+import utils.BindingsGlobals as BindingsGlobals
+from widgets.QJumpWindow import QJumpWindow
+from widgets.bindingsWindow import BindingsWindow
 
 UNDOHISTORY = 20
 
@@ -85,7 +85,7 @@ class MainWindow(QMainWindow):
         self.baseHeight = 480
         self.mediaListPosition = 0
         self.mediaList = []
-        self.path = "."
+        self.path = ".."
         self.configFilePath = ""
         self.eventsConfig = {"keys": {}}
         self.forbiddenKeys = [Qt.Key_Escape, Qt.Key_Right, Qt.Key_Left,

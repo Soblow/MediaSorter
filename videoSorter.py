@@ -14,7 +14,7 @@ from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QPushButton, QSlider, QStyle, QVBoxLayout
 
-from mainWindow import MainWindow
+from widgets.mainWindow import MainWindow
 
 
 class VideoSorter(MainWindow):

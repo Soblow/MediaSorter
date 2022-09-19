@@ -10,8 +10,8 @@ import logging
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QFileDialog, QWidget
 
-from bindingsListWidget import BindingsListWidget
-from createBindingDialog import CreateBindingDialog
+from widgets.bindingsListWidget import BindingsListWidget
+from widgets.createBindingDialog import CreateBindingDialog
 
 
 class BindingsWindow(QDialog):

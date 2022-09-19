@@ -11,7 +11,7 @@ import queue
 import time
 from PyQt5.QtCore import QMimeDatabase
 
-import fileUtils as fsUtils
+import utils.fileUtils as fsUtils
 
 
 class AsyncDirectoryIndexer:
