@@ -49,7 +49,7 @@ class VideoSorter(MainWindow):
         self.controlLayout.addWidget(self.playButton)
         self.controlLayout.addWidget(self.positionSlider)
 
-        self.volume = 100
+        self.volume = 50
         self.initUI()
         self.prepareMediaList(path=".")
         self.isActive = False
@@ -146,7 +146,7 @@ class VideoSorter(MainWindow):
             self.videoPlayer.setVolume(self.volume)
             event.accept()
         elif eventKey == Qt.Key_0:
-            self.volume = 100
+            self.volume = 50
             self.videoPlayer.setVolume(self.volume)
             event.accept()
 
