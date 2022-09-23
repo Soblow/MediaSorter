@@ -6,6 +6,7 @@ PyQt5 is used to provide a clean and stable UI, as well as some common useful fe
 ## Installation
 
 You will need to install Python3 (version 3.8 at least). Then, install required packaged in `requirements.txt`.
+Qt5 is used via the pyQt bindings. Version 3.15 at least is required.
 This project hasn't been tested on another platform than Linux, so run it at your own risks if you want to use it on other OSes
 
 ## Usage
@@ -14,27 +15,34 @@ The main windows are `imageSorter.py` and `videoSorter.py`. Run either of these 
 
 The main UI consists of a list of bindings, and a media viewer.
 
+### Bindings
 Each key can be bound to a given action:
 - "move" to move a file to a given folder. It will then be removed from the list
 - "copy" to only copy it. It won't be removed from the list
 - "nothing" to not do anything (consider this as a placeholder)
+
+#### Default
 In addition, some keys are bound by default to some actions and cannot (yet) be edited:
 - "Backspace"=>"hide" will remove current entry from the list
 - "Home"/"End" respecitvly go to the first/last entry in the list
 - "Del" will delete the file (by putting it to your trash folder)
 - "Left"/"Right" allows you go to previous/next media
 - "Esc" will close the application
-Specific to imageSorter:
+
+#### Specific to imageSorter
 - "+"/"-" will zoom-in
 - "0" will reset zoom to 100%
 - "1" will reset zoom to the original "ideal" ratio
 - "Inser" will try to copy the current image to your clipboard 
-Specific to videoSorter:
+
+#### Specific to videoSorter
 - "+"/"-" will increase/decrease volume
 - "0" will reset the volume to 50
 - "Space" will pause/resume video
 
+#### Mouse
 In addition, some mouse actions are available:
+
 For imageSorter:
 - Maintain mouseMiddleClick and move the mouse to move the image
 - mouseWheel will increase/decrease image zoom

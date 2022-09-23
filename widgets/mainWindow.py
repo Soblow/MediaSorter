@@ -393,7 +393,7 @@ class MainWindow(QMainWindow):
 
     def actDelete(self):
         if self.isActive:
-            newDirectory = os.path.expanduser("~/.local/share/Trash/files")  # TODO: Find a crossplatform alternative
+            newDirectory = os.path.expanduser("~/.local/share/Trash/files")
             self.moveFile(newDirectory)
 
     def moveFile(self, newDirectory: str):
