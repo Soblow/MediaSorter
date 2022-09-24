@@ -8,7 +8,7 @@ import logging
 import os
 import sys
 
-from PyQt5.QtCore import QCoreApplication, QSettings, Qt, QUrl, QSize, QPoint, QByteArray
+from PyQt5.QtCore import Qt, QUrl, QSize, QPoint, QByteArray
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget
@@ -24,11 +24,8 @@ class VideoSorter(MainWindow):
 
     def __init__(self, parent: QWidget = None, flags: Qt.WindowFlags = Qt.WindowFlags()):
         super().__init__(parent, flags)
-        QCoreApplication.setOrganizationName("lRdG")
-        QCoreApplication.setApplicationName("PyQt5 Video Library Sorter")
-        self.settings = QSettings("./settings.ini", QSettings.IniFormat)
-        self.title = 'PyQt5 Video Sorter'
-        self.forbiddenKeys += [Qt.Key_Space, Qt.Key_Plus, Qt.Key_Minus, Qt.Key_0]
+        self.title = 'Video Sorter'
+        self.forbiddenKeys += self.settings.videoKeys.keys()
         self.dummy = QWidget()
         self.dummyLayout = QVBoxLayout()
         self.videoPlayer = QMediaPlayer(self, QMediaPlayer.VideoSurface)
@@ -49,9 +46,7 @@ class VideoSorter(MainWindow):
         self.controlLayout.addWidget(self.playButton)
         self.controlLayout.addWidget(self.positionSlider)
 
-        self.volume = 50
         self.initUI()
-        self.prepareMediaList(path=".")
         self.isActive = False
         self.show()
 
@@ -94,10 +89,10 @@ class VideoSorter(MainWindow):
     def play(self):
         if self.videoPlayer.state() == QMediaPlayer.PlayingState:
             self.videoPlayer.pause()
-            self.statusBar().showMessage("Playing.")
+            self.statusBar().showMessage("Pausing.")
         else:
             self.videoPlayer.play()
-            self.statusBar().showMessage("Pausing.")
+            self.statusBar().showMessage("Playing.")
 
     def mediaStateChanged(self, state: QMediaPlayer.MediaStatus):
         if state == QMediaPlayer.PlayingState:
@@ -123,31 +118,33 @@ class VideoSorter(MainWindow):
 
     def zoom(self, factor: QPoint):
         if factor.y() > 0:
-            self.volume = min(100, self.volume + 5)
-            self.statusBar().showMessage(f"Volume set to {self.volume}.")
+            self.settings.volume = min(100, self.settings.volume + 5)
+            self.statusBar().showMessage(f"Volume set to {self.settings.volume}.")
         else:
-            self.volume = max(0, self.volume - 5)
-            self.statusBar().showMessage(f"Volume set to {self.volume}.")
-        self.videoPlayer.setVolume(self.volume)
+            self.settings.volume = max(0, self.volume - 5)
+            self.statusBar().showMessage(f"Volume set to {self.settings.volume}.")
+        self.videoPlayer.setVolume(self.settings.volume)
 
     def keyPressEvent(self, event: QKeyEvent):
         super().keyPressEvent(event)
         eventKey = event.key()
-        if eventKey == Qt.Key_Space:
+        if eventKey not in self.settings.videoKeys:
+            return
+        act = self.settings.videoKeys[eventKey]
+        if act == "pause":
             self.play()
-            event.accept()
-        elif eventKey == Qt.Key_Plus:
-            self.volume = min(100, self.volume + 5)
-            self.videoPlayer.setVolume(self.volume)
-            event.accept()
-        elif eventKey == Qt.Key_Minus:
-            self.volume = max(0, self.volume - 5)
-            self.videoPlayer.setVolume(self.volume)
-            event.accept()
-        elif eventKey == Qt.Key_0:
-            self.volume = 50
-            self.videoPlayer.setVolume(self.volume)
-            event.accept()
+        elif act == "volumeUp":
+            self.settings.volume = min(100, self.settings.volume + 5)
+            self.videoPlayer.setVolume(self.settings.volume)
+        elif act == "volumeDown":
+            self.settings.volume = max(0, self.settings.volume - 5)
+            self.videoPlayer.setVolume(self.settings.volume)
+        elif act == "volumeReset":
+            self.settings.volume = 50
+            self.videoPlayer.setVolume(self.settings.volume)
+        else:
+            logging.error("Unsupported action from settings (%s). This should never happen", act)
+        event.accept()
 
 
 if __name__ == '__main__':

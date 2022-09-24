@@ -6,7 +6,6 @@ None
 - Similar to undo hide, allow putting back moved items to list
 - Current indexing method doesn't guarantee any order
 - Options menu (history size, main buttons...)
-- In-code TODOs
 
 ## Suggestions
 - Add docstrings to functions
@@ -19,8 +18,6 @@ None
 - Copy/paste videos
 - Undo/Redo history list widget
 - Popup with folder infos / file infos
-- Split global config from directory config, make the global config for "standard" keys (hide, delete, next...), overridable (for ex the def) with folder directory
-  - Make it customizable from Option dialog
 
 ## Migration to Qt6
 - Required for some new features

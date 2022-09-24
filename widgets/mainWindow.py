@@ -9,12 +9,11 @@ imageSorter & videoSorter herit from this base class
 import copy
 import json
 import logging
-import os
 import pickle
 import math
 
-from PyQt5.QtCore import Qt, pyqtSlot, QTimer, QPoint, QByteArray
-from PyQt5.QtGui import QKeySequence, QGuiApplication, QWheelEvent, QKeyEvent
+from PyQt5.QtCore import Qt, pyqtSlot, QTimer, QPoint, QByteArray, QCoreApplication
+from PyQt5.QtGui import QKeySequence, QGuiApplication, QWheelEvent, QKeyEvent, QCloseEvent
 from PyQt5.QtWidgets import QMainWindow, \
     QAction, QTableWidget, QAbstractItemView, QTableWidgetItem, QFileDialog, QSplitter, QVBoxLayout, QWidget, QLabel, \
     QSizePolicy, QHBoxLayout, QMessageBox
@@ -22,52 +21,10 @@ from PyQt5.QtWidgets import QMainWindow, \
 from utils import fileUtils as fsUtils
 from utils import AsyncDirectoryIndexer
 from utils import BindingsGlobals
-from utils.MediaEntry import MediaEntry
-from utils.UndoRedo import HistoryEntry
+from utils.Settings import Settings
+from utils.UndoRedo import HistoryEntry, doHistory
 from widgets.QJumpWindow import QJumpWindow
 from widgets.bindingsWindow import BindingsWindow
-
-UNDOHISTORY = 20
-
-
-def doHistory(history: list[HistoryEntry], otherHistory: list[HistoryEntry], mediaList: list[MediaEntry], mediaListPosition: int) -> tuple[str, int]:
-    act_msg = "no action"
-    newPos = mediaListPosition
-    if len(history) > 0:
-        previousAction = history.pop()
-        newAction = copy.deepcopy(previousAction)
-        # if "oldPos" in previousAction:
-        #     newPos = previousAction.position
-
-        if previousAction.action == "move":
-            newAction = fsUtils.moveFile(previousAction.newPath, os.path.split(previousAction.oldPath)[0])
-            if newAction is not None:
-                # newAction.entry = previousAction.entry
-                # newAction.position = previousAction.position
-                act_msg = "move "+previousAction.oldPath
-                # if os.path.exists(previousAction.entry["path"]):
-                #     mediaList.insert(previousAction.position, previousAction.entry)
-                # else:
-                #     mediaList.pop(mediaListPosition)
-                #     newPos = mediaListPosition
-        elif previousAction.action == "copy":
-            newAction = fsUtils.deleteCopyFile(previousAction.oldPath, previousAction.newPath)
-            if newAction is not None:
-                act_msg = "copy "+previousAction.oldPath
-        elif previousAction.action == "delete_copy":
-            newAction = fsUtils.copyFile(previousAction.oldPath, previousAction.newPath)
-            if newAction is not None:
-                act_msg = "delete_copy "+previousAction.oldPath
-        elif previousAction.action == "hide":
-            newAction = None
-            act_msg = "hide "+previousAction.entry.path
-            mediaList.insert(previousAction.position, previousAction.entry)
-            newPos = min(previousAction.position, len(mediaList)+1)
-        if newAction is not None:
-            otherHistory.append(newAction)
-        if len(otherHistory) > UNDOHISTORY:
-            otherHistory.pop(0)
-    return act_msg, newPos
 
 
 class MainWindow(QMainWindow):
@@ -79,20 +36,20 @@ class MainWindow(QMainWindow):
 
     def __init__(self, parent: QWidget = None, flags: Qt.WindowFlags = Qt.WindowFlags()):
         super().__init__(parent, flags)
-        # QCoreApplication.setOrganizationName("OrganizationName")
-        # QCoreApplication.setApplicationName("PyQt5 Image Library Sorter")
-        # self.settings = QSettings("./settings.ini", QSettings.IniFormat)
-        self.title = "PyQt5 mainWindow"
-        self.baseWidth = 640
-        self.baseHeight = 480
+
+        QCoreApplication.setOrganizationName("OrganizationName")
+        QCoreApplication.setApplicationName("MediaSorter")
+        self.settings = Settings()
+        # logging.basicConfig(encoding='utf-8', level=logging.DEBUG)
+        logging.getLogger().setLevel(self.settings.logLevel)
+        self.title = "MediaSorter"
         self.mediaListPosition = 0
         self.mediaList = []
         self.path = ".."
         self.configFilePath = ""
         self.eventsConfig = {"keys": {}}
-        self.forbiddenKeys = [Qt.Key_Escape, Qt.Key_Right, Qt.Key_Left,
-                              Qt.Key_Home, Qt.Key_End, Qt.Key_Delete,
-                              Qt.Key_Insert, Qt.Key_Backspace]
+        self.forbiddenKeys = [Qt.Key_Escape]
+        self.forbiddenKeys += self.settings.globalKeys.keys()
         self.isActive = False
         self.nonexist = False
         self.undoHistory = []
@@ -131,15 +88,15 @@ class MainWindow(QMainWindow):
         self.asyncIndexer = AsyncDirectoryIndexer.AsyncDirectoryIndexer()
         self.asyncIndexerTimer = QTimer()
 
-        logging.basicConfig(encoding='utf-8', level=logging.DEBUG)
-        logging.getLogger().setLevel(logging.DEBUG)
-
         # initUI will be called on herited classes
 
     def initUI(self):
         # Main window params
         self.setWindowTitle(self.title)
-        self.resize(self.baseWidth, self.baseHeight)
+
+        size, pos = self.settings.restore()
+        self.resize(size)
+        self.move(pos)
 
         self.fileMenu.addAction(self.openDirectoryAction)
         self.fileMenu.addAction(self.saveDirectoryIndexAction)
@@ -241,7 +198,7 @@ class MainWindow(QMainWindow):
         self.redoAction.setEnabled(False)
         self.undoHistory.append(action)
         self.undoAction.setEnabled(len(self.undoHistory) > 0)
-        if len(self.undoHistory) > UNDOHISTORY:
+        if len(self.undoHistory) > self.settings.historyLength:
             self.undoHistory.pop(0)
 
     def emptyUndoRedo(self):
@@ -251,7 +208,7 @@ class MainWindow(QMainWindow):
         self.redoAction.setEnabled(False)
 
     def undo(self):
-        msg, self.mediaListPosition = doHistory(self.undoHistory, self.redoHistory, self.mediaList, self.mediaListPosition)
+        msg, self.mediaListPosition = doHistory(self.settings.historyLength, self.undoHistory, self.redoHistory, self.mediaList, self.mediaListPosition)
         self.statusBar().showMessage(f"Undo: {msg}.")
         self.updateProgress()
         self.updateCurrentMedia()
@@ -259,7 +216,7 @@ class MainWindow(QMainWindow):
         self.redoAction.setEnabled(len(self.redoHistory) > 0)
 
     def redo(self):
-        msg, self.mediaListPosition = doHistory(self.redoHistory, self.undoHistory, self.mediaList, self.mediaListPosition)
+        msg, self.mediaListPosition = doHistory(self.settings.historyLength, self.redoHistory, self.undoHistory, self.mediaList, self.mediaListPosition)
         self.statusBar().showMessage(f"Redo: {msg}.")
         self.updateProgress()
         self.updateCurrentMedia()
@@ -348,7 +305,7 @@ class MainWindow(QMainWindow):
         self.actionsAvailable.resizeRowsToContents()
 
     def showAbout(self):
-        _temp = QMessageBox.about(self, "About", "This project was made by DoctorTee. Available under license provided in LICENSE.md")
+        _temp = QMessageBox.about(self, "About", "This project was made by Soblow. Available under license provided in LICENSE.md")
 
     def editConfig(self):
         _temp = BindingsWindow(self, copy.deepcopy(self.eventsConfig), self.configFilePath, self.forbiddenKeys)
@@ -466,6 +423,11 @@ class MainWindow(QMainWindow):
     def splitterMovedEvent(self, _pos: int, _index: int):
         self.actionsAvailable.resizeRowsToContents()
 
+    def closeEvent(self, a0: QCloseEvent) -> None:
+        self.settings.save(self.size(), self.pos())
+        super().closeEvent(a0)
+        a0.accept()
+
     def keyPressEvent(self, event: QKeyEvent):
         # Note: Please note that events may also be handled by herited classes
         eventKey = event.key()
@@ -473,26 +435,24 @@ class MainWindow(QMainWindow):
         if eventKey == Qt.Key_Escape:
             self.close()
             event.accept()
-        elif eventKey == Qt.Key_Right:
-            self.next()
-            event.accept()
-        elif eventKey == Qt.Key_Left:
-            self.previous()
-            event.accept()
-        elif eventKey == Qt.Key_Home:
-            self.homeKey()
-            event.accept()
-        elif eventKey == Qt.Key_End:
-            self.endKey()
-            event.accept()
-        elif eventKey == Qt.Key_Delete:
-            self.actDelete()
-            event.accept()
-        elif eventKey == Qt.Key_Insert:
-            self.copyCurrentToClipboard()
-            event.accept()
-        elif eventKey == Qt.Key_Backspace:
-            self.hideFile()
+        elif eventKey in self.settings.globalKeys:
+            act = self.settings.globalKeys[eventKey]
+            if act == "next":
+                self.next()
+            elif act == "prev":
+                self.previous()
+            elif act == "first":
+                self.homeKey()
+            elif act == "last":
+                self.endKey()
+            elif act == "delete":
+                self.actDelete()
+            elif act == "clipboard":
+                self.copyCurrentToClipboard()
+            elif act == "hide":
+                self.hideFile()
+            else:
+                logging.error("Unsupported action from settings (%s). This should never happen", act)
             event.accept()
         elif (str(event.key()) in self.eventsConfig['keys']) and self.isActive:
             action = self.eventsConfig['keys'][str(event.key())]["action"]

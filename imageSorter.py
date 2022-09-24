@@ -4,16 +4,21 @@ imageSorter
 
 Provides the image version of mainWindow
 """
+import logging
 import os.path
 import sys
 
-from PyQt5.QtCore import QCoreApplication, QSettings, Qt, QSize, QPoint, QByteArray
+from PyQt5.QtCore import Qt, QSize, QPoint, QByteArray
 from PyQt5.QtGui import QImageReader, QMouseEvent, QResizeEvent, QKeyEvent
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout
 
 from widgets.QConstantRatioImage import QConstantRatioImage
 from widgets.QNoWheeleventScrollArea import QNoWheeleventScrollArea
 from widgets.mainWindow import MainWindow
+
+
+ZOOM_IN_RATIO = 1.25
+ZOOM_OUT_RATIO = 0.8
 
 
 class ImageSorter(MainWindow):
@@ -23,17 +28,13 @@ class ImageSorter(MainWindow):
 
     def __init__(self, parent: QWidget = None, flags: Qt.WindowFlags = Qt.WindowFlags()):
         super().__init__(parent, flags)
-        QCoreApplication.setOrganizationName("lRdG")
-        QCoreApplication.setApplicationName("PyQt5 Image Library Sorter")
-        self.settings = QSettings("./settings.ini", QSettings.IniFormat)
-        self.title = 'PyQt5 Image Sorter'
-        self.forbiddenKeys += [Qt.Key_Plus, Qt.Key_Minus, Qt.Key_0, Qt.Key_1]
+        self.title = 'Image Sorter'
+        self.forbiddenKeys += self.settings.imageKeys.keys()
         self.dummyWidgetSA = QWidget()
         self.dummyLayoutSA = QVBoxLayout()
         self.scrollArea = QNoWheeleventScrollArea()
-        self.image = QConstantRatioImage("", self, (0.8, 1.25))
+        self.image = QConstantRatioImage("", self, (ZOOM_OUT_RATIO, ZOOM_IN_RATIO))
         self.initUI()
-        self.prepareMediaList(path=".")
         self.isActive = False
         self.nonexist = False
         self.show()
@@ -115,18 +116,20 @@ class ImageSorter(MainWindow):
     def keyPressEvent(self, event: QKeyEvent):
         super().keyPressEvent(event)
         eventKey = event.key()
-        if eventKey == Qt.Key_Plus:
+        if eventKey not in self.settings.imageKeys:
+            return
+        act = self.settings.imageKeys[eventKey]
+        if act == "zoomUp":
             self.image.zoomUp()
-            event.accept()
-        elif eventKey == Qt.Key_Minus:
+        elif act == "zoomDown":
             self.image.zoomDown()
-            event.accept()
-        elif eventKey == Qt.Key_0:
+        elif act == "zoomReset":
             self.image.resetZoom()
-            event.accept()
-        elif eventKey == Qt.Key_1:
+        elif act == "zoomRatio":
             self.image.originalRatio()
-            event.accept()
+        else:
+            logging.error("Unsupported action from settings (%s). This should never happen", act)
+        event.accept()
 
 
 if __name__ == '__main__':
