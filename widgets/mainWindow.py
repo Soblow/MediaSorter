@@ -51,7 +51,7 @@ def doHistory(history: list[HistoryEntry], otherHistory: list[HistoryEntry], med
                 #     mediaList.pop(mediaListPosition)
                 #     newPos = mediaListPosition
         elif previousAction.action == "copy":
-            newAction = fsUtils.deleteFile(previousAction.oldPath, previousAction.newPath)
+            newAction = fsUtils.deleteCopyFile(previousAction.oldPath, previousAction.newPath)
             if newAction is not None:
                 act_msg = "copy "+previousAction.oldPath
         elif previousAction.action == "delete_copy":
@@ -393,8 +393,17 @@ class MainWindow(QMainWindow):
 
     def actDelete(self):
         if self.isActive:
-            newDirectory = os.path.expanduser("~/.local/share/Trash/files")
-            self.moveFile(newDirectory)
+            self.statusBar().showMessage(f"Deleting file {self.mediaList[self.mediaListPosition].path}.")
+            newUndo = fsUtils.deleteFile(self.mediaList[self.mediaListPosition].path)
+            if newUndo is not None:
+                newUndo.position = self.mediaListPosition
+                newUndo.entry = self.mediaList[self.mediaListPosition]
+                self.addNewUndo(newUndo)
+                self.mediaList.pop(self.mediaListPosition)
+                self.next(move=False)
+            else:
+                self.statusBar().showMessage(f"Failed to delete file {self.mediaList[self.mediaListPosition].path}.")
+
 
     def moveFile(self, newDirectory: str):
         if self.isActive:

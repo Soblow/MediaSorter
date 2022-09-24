@@ -8,7 +8,7 @@ import os
 import uuid
 import shutil
 
-from PyQt5.QtCore import QDir, QMimeDatabase
+from PyQt5.QtCore import QDir, QMimeDatabase, QFile
 from PyQt5.QtWidgets import QWidget, QFileDialog
 
 from utils.MediaEntry import MediaEntry
@@ -52,6 +52,22 @@ def getRandomName(path: str) -> str:
     randomPath = uuid.uuid4().hex
     splitText = os.path.splitext(path)
     return splitText[0] + "-" + randomPath + splitText[1]
+
+
+def deleteFile(original: str) -> HistoryEntry | None:
+    if not os.path.exists(original):
+        logging.warning("Source (%s) doesn't exist", original)
+        return None
+
+    result, newFilename = QFile.moveToTrash(original)
+    if not result:
+        return None
+
+    hist = HistoryEntry()
+    hist.action = "move"
+    hist.oldPath = original
+    hist.newPath = newFilename
+    return hist
 
 
 def moveFile(original: str, newDirectory: str) -> HistoryEntry | None:
@@ -102,7 +118,7 @@ def copyFile(original: str, newDirectory: str) -> HistoryEntry | None:
     return hist
 
 
-def deleteFile(original: str, newFilename: str) -> HistoryEntry | None:
+def deleteCopyFile(original: str, newFilename: str) -> HistoryEntry | None:
     if not os.path.exists(newFilename):
         logging.warning("File (%s) doesn't exist", newFilename)
         return None

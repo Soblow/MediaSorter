@@ -1,7 +1,6 @@
 # TODO
 ## Vital
-- Move to Trash using a proper multiplatform method
-  - https://doc.qt.io/qt-5.15/qfile.html#moveToTrash
+None
 
 ## Important
 - Similar to undo hide, allow putting back moved items to list

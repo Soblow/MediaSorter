@@ -5,8 +5,8 @@ PyQt5 is used to provide a clean and stable UI, as well as some common useful fe
 
 ## Installation
 
-You will need to install Python3 (version 3.8 at least). Then, install required packaged in `requirements.txt`.
-Qt5 is used via the pyQt bindings. Version 3.15 at least is required.
+You will need to install Python3 (version 3.8 at least). Then, install required packages in `requirements.txt`.
+Qt5 is used via the pyQt bindings. Version 5.15 at least is required.
 This project hasn't been tested on another platform than Linux, so run it at your own risks if you want to use it on other OSes
 
 ## Usage
@@ -23,10 +23,10 @@ Each key can be bound to a given action:
 
 #### Default
 In addition, some keys are bound by default to some actions and cannot (yet) be edited:
-- "Backspace"=>"hide" will remove current entry from the list
-- "Home"/"End" respecitvly go to the first/last entry in the list
+- "Backspace" will "hide" a file by removing current entry from the list
+- "Home"/"End" respectively go to the first/last entry in the list
 - "Del" will delete the file (by putting it to your trash folder)
-- "Left"/"Right" allows you go to previous/next media
+- "Left"/"Right" moves to previous/next media
 - "Esc" will close the application
 
 #### Specific to imageSorter
@@ -72,7 +72,7 @@ If that's the case, it will append to the filename a random string
 ### Zooming and image ratio conservation
 One of the important features of imageSorter is that it preserves the original image ratio.
 By default, when displaying an image, the program will calculate the zoom ratio required so that the whole image can fit in the current viewport while not altering the ratio.
-This works pretty well for regular images without weird ratios, but can be require some adaptation for example for comics.
+This works pretty well for regular images without weird ratios, but can require some adaptation for example for comics.
 
 ## TODOs
 See `TODO.md` file
