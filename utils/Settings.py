@@ -2,6 +2,7 @@
 This module provides everything related to settings
 """
 import logging
+import pickle
 
 from PyQt5.QtCore import Qt, QSize, QSettings, QPoint
 
@@ -31,7 +32,7 @@ class Settings:
         self.settings.endGroup()
         self.settings.beginGroup("Global")
         self.settings.setValue("historyLength", self.historyLength)
-        self.settings.setValue("logLevel", self.logLevel)
+        self.settings.setValue("logLevel", pickle.dumps(self.logLevel))
         self.settings.endGroup()
         self.settings.beginGroup("ImageSorter")
         self.settings.endGroup()
@@ -55,12 +56,14 @@ class Settings:
                                                            Qt.Key_0: "volumeReset", Qt.Key_Space: "pause"})
         self.settings.endGroup()
         self.settings.beginGroup("Global")
-        self.historyLength = self.settings.value("historyLength", 20)
-        self.logLevel = self.settings.value("logLevel", logging.ERROR)
+        self.historyLength = int(self.settings.value("historyLength", 20))
+        self.logLevel = pickle.loads(self.settings.value("logLevel", pickle.dumps(logging.ERROR)))
         self.settings.endGroup()
         self.settings.beginGroup("ImageSorter")
         self.settings.endGroup()
         self.settings.beginGroup("VideoSorter")
-        self.volume = self.settings.value("volume", 50)
+        self.volume = int(self.settings.value("volume", 50))
         self.settings.endGroup()
+
+        logging.getLogger().setLevel(self.logLevel)
         return size, pos

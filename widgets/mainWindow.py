@@ -25,6 +25,7 @@ from utils.Settings import Settings
 from utils.UndoRedo import HistoryEntry, doHistory
 from widgets.QJumpWindow import QJumpWindow
 from widgets.bindingsWindow import BindingsWindow
+from widgets.SettingsDialog import SettingsDialog
 
 
 class MainWindow(QMainWindow):
@@ -72,6 +73,7 @@ class MainWindow(QMainWindow):
         self.redoAction = QAction("Redo")
         self.jumpToAction = QAction("Jump To")
         self.editConfigAction = QAction("Edit config")
+        self.settingsAction = QAction("Settings")
         self.aboutAction = QAction("About")
         self.mainLayout = QVBoxLayout()
         self.mainWidget = QWidget()
@@ -113,6 +115,8 @@ class MainWindow(QMainWindow):
         self.actionMenu.addAction(self.jumpToAction)
         self.actionMenu.addSeparator()
         self.actionMenu.addAction(self.editConfigAction)
+        self.actionMenu.addSeparator()
+        self.actionMenu.addAction(self.settingsAction)
         self.helpMenu.addAction(self.aboutAction)
 
         self.quitAction.triggered.connect(self.close)
@@ -128,6 +132,7 @@ class MainWindow(QMainWindow):
         self.aboutAction.triggered.connect(self.showAbout)
         self.myWidget.splitterMoved.connect(self.splitterMovedEvent)
         self.editConfigAction.triggered.connect(self.editConfig)
+        self.settingsAction.triggered.connect(self.editSettings)
 
         self.setCentralWidget(self.mainWidget)
         self.actionWidget.setLayout(self.actionLayout)
@@ -261,6 +266,16 @@ class MainWindow(QMainWindow):
             self.updateCurrentMedia()
             self.isActive = True
             self.updateProgress()
+
+    def editSettings(self):
+        dialog = SettingsDialog(self.settings, self)
+        if dialog.exec():
+            logging.info("Saving new settings")
+            self.statusBar().showMessage("Saving new settings")
+            self.settings.save(self.size(), self.pos())
+        else:
+            logging.info("Cancelled, not saving settings")
+            self.statusBar().showMessage("Cancelled, not saving settings")
 
     def chooseConfig(self):
         dialog = QFileDialog(self)
