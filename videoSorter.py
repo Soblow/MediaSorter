@@ -8,7 +8,7 @@ import logging
 import os
 import sys
 
-from PyQt5.QtCore import QCoreApplication, QSettings, Qt, QUrl, QSize, QPoint
+from PyQt5.QtCore import QCoreApplication, QSettings, Qt, QUrl, QSize, QPoint, QByteArray
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget
@@ -70,10 +70,9 @@ class VideoSorter(MainWindow):
 
         super().adjustSplitter()
 
-    def prepareMediaList(self, _triggered: bool = False, path: str = None, _matchingMime: str = None):
-        super().prepareMediaList(_triggered, path, ['video/mp4', 'video/webm', 'video/quicktime',
-                                                    'video/ogg'])
-        # # QImageReader.supportedMimeTypes()
+    def prepareMediaList(self, _triggered: bool = False, path: str = None, _matchingMime: list[QByteArray] = None):
+        super().prepareMediaList(_triggered, path, [QByteArray(b'video/mp4'), QByteArray(b'video/webm'),
+                                                    QByteArray(b'video/quicktime'), QByteArray(b'video/ogg')])
 
     def updateCurrentMedia(self):
         if len(self.mediaList) == 0:

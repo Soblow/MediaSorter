@@ -88,9 +88,10 @@ class QConstantRatioImage(QLabel):
             self.idealFactor = min(windowSize.height() / pixmap.size().height(), windowSize.width() / pixmap.size().width())
             self.idealFactor = min(1.0, self.idealFactor)
 
-    def updateImage(self, newFilename: str, windowSize: QSize = QSize(1920, 1080), animation: bool = False):
+    def updateImage(self, newFilename: str, windowSize: QSize = QSize(1920, 1080), mimeType: str = None):
         if newFilename:
-            if animation:
+            # For some reason, QMovie.supporterFormats returns only the last part of the mimetype...
+            if mimeType.split('/')[-1] in QMovie.supportedFormats():
                 self.movie = QMovie(newFilename)
                 if not self.movie.isValid():
                     logging.error("Movie (%s) isn't valid ", newFilename)

@@ -9,7 +9,7 @@ import multiprocessing
 import os
 import queue
 import time
-from PyQt5.QtCore import QMimeDatabase
+from PyQt5.QtCore import QMimeDatabase, QByteArray
 
 import utils.fileUtils as fsUtils
 from utils.MediaEntry import MediaEntry
@@ -34,7 +34,7 @@ class AsyncDirectoryIndexer:
         self.mimeTypes = []
         logging.debug("Created AsyncDirectoryIndexer")
 
-    def indexWorker(self, inQueue: multiprocessing.Queue, outQueue: multiprocessing.Queue, mimeTypes: list, timeout: float = 0.1):
+    def indexWorker(self, inQueue: multiprocessing.Queue, outQueue: multiprocessing.Queue, mimeTypes: list[QByteArray], timeout: float = 0.1):
         logging.debug("indexWorker process started")
         db = QMimeDatabase()
         while not self.shutdownEvent.is_set():
@@ -79,7 +79,7 @@ class AsyncDirectoryIndexer:
         self.outputQueue.join_thread()
         self.outputQueue = None
 
-    def asyncIndex(self, path: str, matchingMime: list) -> bool:
+    def asyncIndex(self, path: str, matchingMime: list[QByteArray]) -> bool:
         if not os.path.exists(path):
             logging.warning("Unable to start indexing, the folder doesn't exist")
             return False

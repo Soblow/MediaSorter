@@ -8,23 +8,18 @@ import os
 import uuid
 import shutil
 
-from PyQt5.QtCore import QDir, QMimeDatabase, QFile
+from PyQt5.QtCore import QDir, QMimeDatabase, QFile, QByteArray
 from PyQt5.QtWidgets import QWidget, QFileDialog
 
 from utils.MediaEntry import MediaEntry
 from utils.UndoRedo import HistoryEntry
 
-ANIMATEDFORMATS = ["image/gif", "image/webp"]
 
-
-def defaultFilters() -> set[str]:
-    return {"image/png", "image/jpg"}
-
-
-def listFiles(path: str, matchingMime: list = None) -> list[MediaEntry]:
+def listFiles(path: str, matchingMime: list) -> list[MediaEntry]:
     filters = matchingMime
     if filters is None:
-        filters = defaultFilters()
+        logging.warning("Calling listFiles without a matchingMime argument will return an empty list")
+        return []
     result = []
     myFiles: list[str] = QDir(path).entryList(filters=(QDir.Files | QDir.NoDotAndDotDot))
 
@@ -37,7 +32,7 @@ def listFiles(path: str, matchingMime: list = None) -> list[MediaEntry]:
     return result
 
 
-def indexFile(fileInfo: str, filters: list, db: QMimeDatabase) -> MediaEntry | None:
+def indexFile(fileInfo: str, filters: list[QByteArray], db: QMimeDatabase) -> MediaEntry | None:
     fileType = db.mimeTypeForFile(fileInfo).name()
     # magic.from_file(fullpath, mime=True)
     if fileType in filters:

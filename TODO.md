@@ -4,15 +4,12 @@ None
 
 ## Important
 - Similar to undo hide, allow putting back moved items to list
-- Add docstrings to functions
 - Current indexing method doesn't guarantee any order
 - Options menu (history size, main buttons...)
 - In-code TODOs
 
 ## Suggestions
-- Find a proper list of animated formats for imageSorter
-- Find a proper list of supported video formats for videoSorter
-- Windows/Mac/... compatibility?
+- Add docstrings to functions
 - Option to recursively index folders?
 - Volume info on UI (like a widget to graphicaly change it)
 - For videos, keys to control position / skip sections
@@ -24,6 +21,15 @@ None
 - Popup with folder infos / file infos
 - Split global config from directory config, make the global config for "standard" keys (hide, delete, next...), overridable (for ex the def) with folder directory
   - Make it customizable from Option dialog
+
+## Migration to Qt6
+- Required for some new features
+  - Listing available video formats at runtime instead of relying on a hardcoded list
+    - https://doc.qt.io/qt-6/videooverview.html#determining-supported-media-formats-at-runtime
+- Qt5 is deprecated
+- Migration doesn't seem to break too many things
+  - Check if supported on "all" OSes
+  - PyQt6? PySide?
 
 ## Docker-based UI?
 - Movable "containers" with config, status, view, infos...

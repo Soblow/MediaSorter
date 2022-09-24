@@ -8,8 +8,8 @@ from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit, QComboBox, QLabel, \
     QWidget
 
-import utils.fileUtils as fsUtils
-import utils.BindingsGlobals as BindingsGlobals
+from utils import fileUtils as fsUtils
+from utils import BindingsGlobals
 
 
 class ChangeAction(QDialog):

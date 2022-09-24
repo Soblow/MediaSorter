@@ -7,14 +7,13 @@ Provides the image version of mainWindow
 import os.path
 import sys
 
-from PyQt5.QtCore import QCoreApplication, QSettings, Qt, QSize, QPoint
+from PyQt5.QtCore import QCoreApplication, QSettings, Qt, QSize, QPoint, QByteArray
 from PyQt5.QtGui import QImageReader, QMouseEvent, QResizeEvent, QKeyEvent
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout
 
 from widgets.QConstantRatioImage import QConstantRatioImage
 from widgets.QNoWheeleventScrollArea import QNoWheeleventScrollArea
 from widgets.mainWindow import MainWindow
-import utils.fileUtils as fsUtils
 
 
 class ImageSorter(MainWindow):
@@ -49,7 +48,7 @@ class ImageSorter(MainWindow):
 
         super().adjustSplitter()
 
-    def prepareMediaList(self, _triggered: bool = False, path: str = None, _matchingMime: str = None):
+    def prepareMediaList(self, _triggered: bool = False, path: str = None, _matchingMime: list[QByteArray] = None):
         super().prepareMediaList(_triggered, path, QImageReader.supportedMimeTypes())
 
     def updateCurrentMedia(self):
@@ -61,8 +60,7 @@ class ImageSorter(MainWindow):
             if os.path.exists(currpath):
                 self.isActive = True
                 self.image.show()
-                isGif = (self.mediaList[self.mediaListPosition].mime in fsUtils.ANIMATEDFORMATS)
-                self.image.updateImage(currpath, scrollAreaSize, isGif)
+                self.image.updateImage(currpath, scrollAreaSize, self.mediaList[self.mediaListPosition].mime)
                 self.setFileName(currpath)
                 self.image.rescale()
                 return

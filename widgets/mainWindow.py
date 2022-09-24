@@ -13,15 +13,15 @@ import os
 import pickle
 import math
 
-from PyQt5.QtCore import Qt, pyqtSlot, QTimer, QPoint
+from PyQt5.QtCore import Qt, pyqtSlot, QTimer, QPoint, QByteArray
 from PyQt5.QtGui import QKeySequence, QGuiApplication, QWheelEvent, QKeyEvent
 from PyQt5.QtWidgets import QMainWindow, \
     QAction, QTableWidget, QAbstractItemView, QTableWidgetItem, QFileDialog, QSplitter, QVBoxLayout, QWidget, QLabel, \
     QSizePolicy, QHBoxLayout, QMessageBox
 
-import utils.fileUtils as fsUtils
-import utils.AsyncDirectoryIndexer as AsyncDirectoryIndexer
-import utils.BindingsGlobals as BindingsGlobals
+from utils import fileUtils as fsUtils
+from utils import AsyncDirectoryIndexer
+from utils import BindingsGlobals
 from utils.MediaEntry import MediaEntry
 from utils.UndoRedo import HistoryEntry
 from widgets.QJumpWindow import QJumpWindow
@@ -205,7 +205,7 @@ class MainWindow(QMainWindow):
         # self.myWidget.setSizes([math.ceil(self.sizeHint().width()*0.35), math.ceil(self.sizeHint().width()*0.65)])
         # self.myWidget.moveSplitter(math.ceil(self.myWidget.size().width()/3), 1)
 
-    def prepareMediaList(self, _triggered: bool = False, path: str = None, matchingMime: list = None):
+    def prepareMediaList(self, _triggered: bool = False, path: str = None, matchingMime: list[QByteArray] = None):
         if path is not None:
             self.path = path
         self.mediaListPosition = 0
