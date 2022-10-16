@@ -33,7 +33,8 @@ class ImageSorter(MainWindow):
         self.dummyWidgetSA = QWidget()
         self.dummyLayoutSA = QVBoxLayout()
         self.scrollArea = QNoWheeleventScrollArea()
-        self.image = QConstantRatioImage("", self, (ZOOM_OUT_RATIO, ZOOM_IN_RATIO))
+        self.image = QConstantRatioImage(self, (ZOOM_OUT_RATIO, ZOOM_IN_RATIO))
+
         self.initUI()
         self.isActive = False
         self.nonexist = False
@@ -61,11 +62,14 @@ class ImageSorter(MainWindow):
             if os.path.exists(currpath):
                 self.isActive = True
                 self.image.show()
-                self.image.updateImage(currpath, scrollAreaSize, self.mediaList[self.mediaListPosition].mime)
-                self.setFileName(currpath)
-                self.image.rescale()
-                return
-            self.setFileName("File no longer exists")
+                if self.image.updateImage(currpath, scrollAreaSize, self.mediaList[self.mediaListPosition].mime):
+                    self.setFileName(currpath)
+                    self.image.rescale()
+                    return
+                else:
+                    self.setFileName("File is corrupted (height or width is null)")
+            else:
+                self.setFileName("File no longer exists")
             self.nonexist = True
         self.isActive = False
         self.image.hide()

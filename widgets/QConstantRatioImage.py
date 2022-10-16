@@ -15,7 +15,7 @@ class QConstantRatioImage(QLabel):
     Widget to display images with zoom support, which ensures respecting image original ratio
     """
 
-    def __init__(self, path: str, parent: QWidget = None, zoomFactors: tuple[float, float] = (0.8, 1.25)):
+    def __init__(self, parent: QWidget = None, zoomFactors: tuple[float, float] = (0.8, 1.25)):
         super().__init__(parent)
         self.tempPolicy = QSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
         self.zoomPosition = 0
@@ -23,12 +23,10 @@ class QConstantRatioImage(QLabel):
         self.minFactor = 0.0
         self.idealFactor = 1.0
         self.myPixmap = QPixmap()
-        self.defaultPath = path
         self.movie = QMovie()
         self.zoomFactors = zoomFactors
 
         self.initUI()
-        self.updateImage(self.defaultPath)
 
     def initUI(self):
         self.setSizePolicy(self.tempPolicy)
@@ -88,29 +86,34 @@ class QConstantRatioImage(QLabel):
             self.idealFactor = min(windowSize.height() / pixmap.size().height(), windowSize.width() / pixmap.size().width())
             self.idealFactor = min(1.0, self.idealFactor)
 
-    def updateImage(self, newFilename: str, windowSize: QSize = QSize(1920, 1080), mimeType: str = None):
+    def updateImage(self, newFilename: str, windowSize: QSize = QSize(1920, 1080), mimeType: str = None) -> bool:
+        working = False
         if newFilename:
             # For some reason, QMovie.supporterFormats returns only the last part of the mimetype...
             if mimeType.split('/')[-1] in QMovie.supportedFormats():
                 self.movie = QMovie(newFilename)
-                if not self.movie.isValid():
-                    logging.error("Movie (%s) isn't valid ", newFilename)
-                else:
+                if self.movie.isValid():
                     self.setMovie(self.movie)
                     self.movie.start()
+                    working = True
+                else:
+                    logging.error("Movie (%s) isn't valid ", newFilename)
                 self.myPixmap = None
             else:
                 self.myPixmap = QPixmap(newFilename)
-                if self.myPixmap.isNull():
-                    self.myPixmap = QPixmap(self.defaultPath)
-                self.setPixmap(self.myPixmap)
+                if not self.myPixmap.isNull():
+                    pixmapSize = self.myPixmap.size()
+                    if pixmapSize.height() > 0 and pixmapSize.width() > 0:
+                        self.setPixmap(self.myPixmap)
 
-                self.minFactor = 100/max(self.myPixmap.size().height(), self.myPixmap.size().width())
+                        self.minFactor = 100/max(pixmapSize.height(), pixmapSize.width())
 
-                self.calcIdealFactor(windowSize)
+                        self.calcIdealFactor(windowSize)
 
-                self.scaleFactor = self.idealFactor
-                self.zoomPosition = 0
+                        self.scaleFactor = self.idealFactor
+                        self.zoomPosition = 0
 
-                self.adjustSize()
+                        self.adjustSize()
+                        working = True
                 self.movie = None
+        return working

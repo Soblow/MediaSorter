@@ -5,7 +5,11 @@ None
 ## Important
 - Similar to undo hide, allow putting back moved items to list
 - Current indexing method doesn't guarantee any order
+  - An option to autosort once sorting is done
+  - Option to select sorting method
+  - A menu option to sort list
 - Options menu (history size, main buttons...)
+- Weird file progression when empty list (videoSorter at least)
 
 ## Suggestions
 - Add docstrings to functions
@@ -18,6 +22,7 @@ None
 - Copy/paste videos
 - Undo/Redo history list widget
 - Popup with folder infos / file infos
+- Rotate images?
 
 ## Migration to Qt6
 - Required for some new features

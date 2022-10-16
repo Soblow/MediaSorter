@@ -48,6 +48,7 @@ class VideoSorter(MainWindow):
 
         self.initUI()
         self.isActive = False
+        self.nonexist = False
         self.show()
 
     def initUI(self):
@@ -70,29 +71,36 @@ class VideoSorter(MainWindow):
                                                     QByteArray(b'video/quicktime'), QByteArray(b'video/ogg')])
 
     def updateCurrentMedia(self):
-        if len(self.mediaList) == 0:
-            self.isActive = False
-            self.videoPlayer.pause()
-            self.videoWidget.hide()
-            self.setFileName("None")
-            logging.info("No acceptable file found")
-        else:
-            self.isActive = True
-            self.videoWidget.show()
+        self.setFileName("None")
+        self.nonexist = False
+        if len(self.mediaList) > 0:
             relPath = self.mediaList[self.mediaListPosition].path
-            self.setFileName(self.mediaList[self.mediaListPosition].path)
-            relPath = os.path.abspath(relPath)
-            self.videoPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(relPath)))
-            self.playButton.setEnabled(True)
-            self.play()
+            absPath = os.path.abspath(relPath)
+            if os.path.exists(absPath):
+                self.isActive = True
+                self.videoWidget.show()
+                self.setFileName(relPath)
+                self.videoPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(absPath)))
+                self.playButton.setEnabled(True)
+                self.play()
+                return
+            self.setFileName("File no longer exists")
+            logging.info("File no longer exists")
+            self.nonexist = True
+        else:
+            logging.info("No acceptable file found")
+        self.isActive = False
+        self.videoPlayer.pause()
+        self.videoWidget.hide()
 
     def play(self):
-        if self.videoPlayer.state() == QMediaPlayer.PlayingState:
-            self.videoPlayer.pause()
-            self.statusBar().showMessage("Pausing.")
-        else:
-            self.videoPlayer.play()
-            self.statusBar().showMessage("Playing.")
+        if self.isActive:
+            if self.videoPlayer.state() == QMediaPlayer.PlayingState:
+                self.videoPlayer.pause()
+                self.statusBar().showMessage("Pausing.")
+            else:
+                self.videoPlayer.play()
+                self.statusBar().showMessage("Playing.")
 
     def mediaStateChanged(self, state: QMediaPlayer.MediaStatus):
         if state == QMediaPlayer.PlayingState:
@@ -121,7 +129,7 @@ class VideoSorter(MainWindow):
             self.settings.volume = min(100, self.settings.volume + 5)
             self.statusBar().showMessage(f"Volume set to {self.settings.volume}.")
         else:
-            self.settings.volume = max(0, self.volume - 5)
+            self.settings.volume = max(0, self.settings.volume - 5)
             self.statusBar().showMessage(f"Volume set to {self.settings.volume}.")
         self.videoPlayer.setVolume(self.settings.volume)
 
