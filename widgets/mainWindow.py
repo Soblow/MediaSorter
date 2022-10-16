@@ -178,11 +178,23 @@ class MainWindow(QMainWindow):
         self.emptyUndoRedo()
         self.updateCurrentMedia()
         self.isActive = False
-
-        if self.asyncIndexer.asyncIndex(self.path, matchingMime, self.settings.indexing_recursive):
-            logging.debug("Asynchronous indexing started")
-            self.statusBar().showMessage(f"Starting to index {self.path}.")
-            self.asyncIndexerTimer.start(self.settings.indexing_refreshPeriod)  #ms
+        if self.settings.indexing_async:
+            if self.asyncIndexer.asyncIndex(self.path, matchingMime, self.settings.indexing_recursive):
+                logging.debug("Asynchronous indexing started")
+                self.statusBar().showMessage(f"Starting to index {self.path}.")
+                self.asyncIndexerTimer.start(self.settings.indexing_refreshPeriod)  #ms
+        else:
+            self.statusBar().showMessage("Directory indexing has started.")
+            self.mediaList = fsUtils.listFiles(self.path, matchingMime, self.settings.indexing_recursive)
+            self.statusBar().showMessage("Directory indexing has finished.")
+            logging.debug("Synchronous Indexing ended")
+            if len(self.mediaList) > 0:
+                if self.settings.autosort:
+                    self.sortMediaList()
+                self.updateCurrentMedia()
+                self.updateProgress()
+                self.isActive = True
+                logging.info("Synchronous indexing found suitable files, activating the window")
 
     def sortMediaList(self):
         if self.isActive:

@@ -3,7 +3,6 @@
 None
 
 ## Important
-- Add option to enable/disable asynchronous indexing
 - Add main buttons settings to Option Dialog
 - Weird file progression when empty list (videoSorter at least)
 

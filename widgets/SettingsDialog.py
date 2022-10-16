@@ -34,6 +34,7 @@ class SettingsDialog(QDialog):
 
         self.global_historyLength = QSpinBox()
         self.video_volume = QSpinBox()
+        self.global_indexing_async = QCheckBox()
         self.global_indexing_threads = QSpinBox()
         self.global_indexing_refreshPeriod = QSpinBox()
         self.global_indexing_batchSize = QSpinBox()
@@ -60,6 +61,10 @@ class SettingsDialog(QDialog):
         self.layoutGlobal.addLayout(layout)
         layout.addWidget(QLabel("Undo/Redo history length"))
         layout.addWidget(self.global_historyLength)
+        layout = QHBoxLayout()
+        self.layoutGlobal.addLayout(layout)
+        layout.addWidget(QLabel("Use Async indexing, highly recommended especially on slow storage/huge folders (Default: True)"))
+        layout.addWidget(self.global_indexing_async)
         layout = QHBoxLayout()
         self.layoutGlobal.addLayout(layout)
         layout.addWidget(QLabel("Set amount of threads for async indexing (-1/0 means half available cores)"))
@@ -124,6 +129,7 @@ class SettingsDialog(QDialog):
 
         self.video_volume.setValue(self.settings.volume)
         self.global_historyLength.setValue(self.settings.historyLength)
+        self.global_indexing_async.setChecked(self.settings.indexing_async)
         self.global_indexing_threads.setValue(self.settings.indexing_threads)
         self.global_indexing_refreshPeriod.setValue(self.settings.indexing_refreshPeriod)
         self.global_indexing_batchSize.setValue(self.settings.indexing_batchSize)
@@ -136,6 +142,7 @@ class SettingsDialog(QDialog):
     def accept(self) -> None:
         self.settings.volume = self.video_volume.value()
         self.settings.historyLength = self.global_historyLength.value()
+        self.settings.indexing_async = self.global_indexing_async.isChecked()
         self.settings.indexing_threads = self.global_indexing_threads.value()
         self.settings.indexing_refreshPeriod = self.global_indexing_refreshPeriod.value()
         self.settings.indexing_batchSize = self.global_indexing_batchSize.value()

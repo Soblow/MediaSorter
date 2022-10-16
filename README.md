@@ -66,6 +66,12 @@ Later, when you'll restart the program, you can select your previous config file
 For huge directories, you might want to save the indexing results in a file to avoid reindexing the whole folder each time.
 You can do this by going to "File"->"Save Directory Index", and you can load it with "File"->"Load Directory Index"
 
+### (A)synchronous Indexing
+By default, indexing is done asynchronously, using separate "threads" (using multiprocessing).
+This allows to not freeze UI while indexing huge bases, or on slow storage.
+You can change multiple settings to adapt with your own configuration.
+You can also use the synchronous version if needed, which may be faster/safer/more stable depending on your configuration
+
 ### Random filenames
 By default, when you copy/move a file to a directory, it will check if the file doesn't already exist.
 If that's the case, it will append to the filename a random string

@@ -36,6 +36,7 @@ class Settings:
         self.settingsVersion = CURRENTSETTINGSVERSION
         self.historyLength = 20
         self.logLevel = logging.ERROR
+        self.indexing_async = True
         self.indexing_threads = -1
         self.indexing_refreshPeriod = 0.5
         self.indexing_batchSize = 10
@@ -66,6 +67,7 @@ class Settings:
         self.settings.setValue("settingsVersion", self.settingsVersion)
         self.settings.setValue("historyLength", self.historyLength)
         self.settings.setValue("logLevel", pickle.dumps(self.logLevel))
+        self.settings.setValue("indexing_async", self.indexing_async)
         self.settings.setValue("indexing_threads", self.indexing_threads)
         self.settings.setValue("indexing_refreshPeriod", self.indexing_refreshPeriod)
         self.settings.setValue("indexing_batchSize", self.indexing_batchSize)
@@ -113,6 +115,7 @@ class Settings:
         self.historyLength = self.settings.value("historyLength", 20, type=int)
         self.logLevel = pickle.loads(self.settings.value("logLevel", pickle.dumps(logging.ERROR)))
 
+        self.indexing_async = self.settings.value("indexing_async", False, type=bool)
         self.indexing_threads = self.settings.value("indexing_threads", -1, type=int)
         self.indexing_refreshPeriod = self.settings.value("indexing_refreshPeriod", 50, type=int)
         self.indexing_batchSize = self.settings.value("indexing_batchSize", 50, type=int)
