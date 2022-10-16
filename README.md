@@ -78,7 +78,7 @@ This works pretty well for regular images without weird ratios, but can require 
 ### Directory indexing
 By default, directory indexing is done asynchronously, which also means that the resulting list isn't deterministically created.
 If you prefer having a "sorted" list, you can use "Edit" -> "Sort media list".
-In the future, an option will be made available to select sorting method (name, size...), and if it must be done automatically when indexing is done.
+An option will be made available to select sorting method (name, size...), and if it must be done automatically when indexing is done.
 
 ## TODOs
 See `TODO.md` file

@@ -5,6 +5,7 @@ Brings the ASyncDirectoryIndexer module
 """
 
 import logging
+import math
 import multiprocessing
 import os
 import queue
@@ -22,14 +23,18 @@ class AsyncDirectoryIndexer:
     stopKeyword = "STOP"
     prefix = "indexWorker"
 
-    def __init__(self, threads: int = 4):
-        self.threads = threads
+    def __init__(self, threads: int = -1):
+        if threads != -1:
+            self.threads = threads
+        else:
+            self.threads = max(math.ceil(len(os.sched_getaffinity(0))/2), 1)
         self.outputQueue = multiprocessing.Queue()
         self.inputQueue = multiprocessing.Queue()
         self.shutdownEvent = multiprocessing.Event()
         self.indexedCount = 0
         self.totalCount = 0
         self.rez = None
+        self.recursive = False
         self.folderFiles = []
         self.mimeTypes = []
         logging.debug("Created AsyncDirectoryIndexer")
@@ -79,11 +84,12 @@ class AsyncDirectoryIndexer:
         self.outputQueue.join_thread()
         self.outputQueue = None
 
-    def asyncIndex(self, path: str, matchingMime: list[QByteArray]) -> bool:
+    def asyncIndex(self, path: str, matchingMime: list[QByteArray], recursive=False) -> bool:
         if not os.path.exists(path):
             logging.warning("Unable to start indexing, the folder doesn't exist")
             return False
 
+        self.recursive = recursive
         self.folderFiles: list[str] = []
         self.outputQueue = multiprocessing.Queue()
         self.inputQueue = multiprocessing.Queue()
@@ -93,11 +99,17 @@ class AsyncDirectoryIndexer:
 
         self.mimeTypes = matchingMime
         self.startProcess()
-        for e in os.scandir(path):
-            if e.is_file():
-                self.totalCount += 1
-                self.folderFiles.append(e.path)
-                self.inputQueue.put(e.path)
+        folderList = [path]
+        while len(folderList) > 0:
+            p = folderList.pop()
+            for e in os.scandir(p):
+                pa = e.path
+                if e.is_file():
+                    self.totalCount += 1
+                    self.folderFiles.append(pa)
+                    self.inputQueue.put(pa)
+                elif self.recursive:
+                    folderList.append(pa)
 
         return True
 
@@ -119,6 +131,19 @@ class AsyncDirectoryIndexer:
                 break
             itemCount += 1
             rez.append(item)
+        return rez
+
+    def getBulkTimed(self, timeLimit: int = 0.5) -> list[MediaEntry] | None:
+        if self.outputQueue.empty():
+            return None
+        rez = []
+        curTime = time.monotonic()
+        finalTime = curTime + timeLimit
+        while time.monotonic() < finalTime:
+            item = self.getBulk(10)
+            if item is None:
+                break
+            rez += item
         return rez
 
     def progress(self) -> tuple[int, int]:

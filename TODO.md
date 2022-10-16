@@ -3,11 +3,7 @@
 None
 
 ## Important
-- Add better options for the indexing (number of threads, period of refresh, amount per batch)
-  - Maybe do a time-based refresh rather than amount-based (like, take items until empty or lasted more than 10ms?)
-- Add option to auto-sort when indexing is finished
-- Add option to select sorting method
-- Add option to recursively index folders?
+- Add option to enable/disable asynchronous indexing
 - Add main buttons settings to Option Dialog
 - Weird file progression when empty list (videoSorter at least)
 

@@ -21,7 +21,7 @@ from PyQt5.QtWidgets import QMainWindow, \
 from utils import fileUtils as fsUtils
 from utils import AsyncDirectoryIndexer
 from utils import BindingsGlobals
-from utils.Settings import Settings
+from utils.Settings import Settings, SortMethod
 from utils.UndoRedo import HistoryEntry, doHistory
 from widgets.QJumpWindow import QJumpWindow
 from widgets.bindingsWindow import BindingsWindow
@@ -88,7 +88,7 @@ class MainWindow(QMainWindow):
 
         self.clipboard = QGuiApplication.clipboard()
 
-        self.asyncIndexer = AsyncDirectoryIndexer.AsyncDirectoryIndexer()
+        self.asyncIndexer = AsyncDirectoryIndexer.AsyncDirectoryIndexer(threads=self.settings.indexing_threads)
         self.asyncIndexerTimer = QTimer()
 
         # initUI will be called on herited classes
@@ -179,24 +179,34 @@ class MainWindow(QMainWindow):
         self.updateCurrentMedia()
         self.isActive = False
 
-        if self.asyncIndexer.asyncIndex(self.path, matchingMime):
+        if self.asyncIndexer.asyncIndex(self.path, matchingMime, self.settings.indexing_recursive):
             logging.debug("Asynchronous indexing started")
             self.statusBar().showMessage(f"Starting to index {self.path}.")
-            self.asyncIndexerTimer.start(50)  # 50ms
+            self.asyncIndexerTimer.start(self.settings.indexing_refreshPeriod)  #ms
 
     def sortMediaList(self):
         if self.isActive:
             logging.info("Sorting media list")
             self.statusBar().showMessage("Sorting media list.")
             self.mediaListPosition = 0
-            self.mediaList.sort()
+            if self.settings.sort_method == SortMethod.name:
+                self.mediaList.sort()
+            elif self.settings.sort_method == SortMethod.nameRev:
+                self.mediaList.sort(reverse=True)
+            elif self.settings.sort_method == SortMethod.size:
+                self.mediaList.sort(key=lambda x, y: x.compareSize(y))
+            elif self.settings.sort_method == SortMethod.sizeDec:
+                self.mediaList.sort(key=lambda x, y: x.compareSize(y), reverse=True)
             self.updateProgress()
             self.updateCurrentMedia()
             self.emptyUndoRedo()
 
     def asyncPeriodicChecker(self):
         progress = self.asyncIndexer.progress()
-        newEntries = self.asyncIndexer.getBulk(50)
+        if self.settings.indexing_batchTime:
+            newEntries = self.asyncIndexer.getBulkTimed(self.settings.indexing_batchTimeLimit)
+        else:
+            newEntries = self.asyncIndexer.getBulk(self.settings.indexing_batchSize)
         if newEntries and len(newEntries) > 0:
             flag = (len(self.mediaList) == 0)
             self.mediaList += newEntries
@@ -210,6 +220,8 @@ class MainWindow(QMainWindow):
             logging.debug("Asynchronous Indexing ended, stopping periodic check")
             self.asyncIndexerTimer.stop()
             self.asyncIndexer.stopProcess()
+            if self.settings.autosort:
+                self.sortMediaList()
 
     def addNewUndo(self, action: HistoryEntry):
         self.redoHistory = []

@@ -15,22 +15,41 @@ from utils.MediaEntry import MediaEntry
 from utils.UndoRedo import HistoryEntry
 
 
-def listFiles(path: str, matchingMime: list) -> list[MediaEntry]:
+def listFiles(path: str, matchingMime: list[QByteArray], recursive=False) -> list[MediaEntry]:
     filters = matchingMime
     if filters is None:
         logging.warning("Calling listFiles without a matchingMime argument will return an empty list")
         return []
+    if recursive:
+        return listFilesRecursive(path, matchingMime)
     result = []
     myFiles: list[str] = QDir(path).entryList(filters=(QDir.Files | QDir.NoDotAndDotDot))
 
     for e in myFiles:
-        fullpath = path + "/" + e
+        fullpath = os.path.join(path, e)
         entry = indexFile(fullpath, filters, QMimeDatabase())
         if entry:
             result.append(entry)
 
     return result
 
+def listFilesRecursive(path: str, matchingMime: list[QByteArray]) -> list[MediaEntry]:
+    result = []
+    folder = [path]
+    while len(folder) > 0:
+        p = folder.pop()
+        myFiles: list[str] = QDir(p).entryList(filters=(QDir.Files | QDir.NoDotAndDotDot | QDir.Dirs))
+
+        for e in myFiles:
+            if os.path.isdir(e):
+                folder.append(e)
+            else:
+                fullpath = os.path.join(path, e)
+                entry = indexFile(fullpath, matchingMime, QMimeDatabase())
+                if entry:
+                    result.append(entry)
+
+    return result
 
 def indexFile(fileInfo: str, filters: list[QByteArray], db: QMimeDatabase) -> MediaEntry | None:
     fileType = db.mimeTypeForFile(fileInfo).name()
