@@ -71,6 +71,7 @@ class MainWindow(QMainWindow):
         self.quitAction = QAction("Quit")
         self.undoAction = QAction("Undo")
         self.redoAction = QAction("Redo")
+        self.sortAction = QAction("Sort media list")
         self.jumpToAction = QAction("Jump To")
         self.editConfigAction = QAction("Edit config")
         self.settingsAction = QAction("Settings")
@@ -112,6 +113,7 @@ class MainWindow(QMainWindow):
         self.actionMenu.addAction(self.undoAction)
         self.actionMenu.addAction(self.redoAction)
         self.actionMenu.addSeparator()
+        self.actionMenu.addAction(self.sortAction)
         self.actionMenu.addAction(self.jumpToAction)
         self.actionMenu.addSeparator()
         self.actionMenu.addAction(self.editConfigAction)
@@ -124,6 +126,7 @@ class MainWindow(QMainWindow):
         self.undoAction.triggered.connect(self.undo)
         self.redoAction.triggered.connect(self.redo)
         self.jumpToAction.triggered.connect(self.jumpTo)
+        self.sortAction.triggered.connect(self.sortMediaList)
         self.openDirectoryAction.triggered.connect(self.chooseDir)
         self.saveDirectoryIndexAction.triggered.connect(self.saveDirIndex)
         self.openDirectoryIndexAction.triggered.connect(self.loadDirIndex)
@@ -180,6 +183,16 @@ class MainWindow(QMainWindow):
             logging.debug("Asynchronous indexing started")
             self.statusBar().showMessage(f"Starting to index {self.path}.")
             self.asyncIndexerTimer.start(50)  # 50ms
+
+    def sortMediaList(self):
+        if self.isActive:
+            logging.info("Sorting media list")
+            self.statusBar().showMessage("Sorting media list.")
+            self.mediaListPosition = 0
+            self.mediaList.sort()
+            self.updateProgress()
+            self.updateCurrentMedia()
+            self.emptyUndoRedo()
 
     def asyncPeriodicChecker(self):
         progress = self.asyncIndexer.progress()

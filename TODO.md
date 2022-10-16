@@ -3,24 +3,23 @@
 None
 
 ## Important
-- Similar to undo hide, allow putting back moved items to list
-- Current indexing method doesn't guarantee any order
-  - An option to autosort once sorting is done
-  - Option to select sorting method
-  - A menu option to sort list
-- Options menu (main buttons...)
+- Add better options for the indexing (number of threads, period of refresh, amount per batch)
+  - Maybe do a time-based refresh rather than amount-based (like, take items until empty or lasted more than 10ms?)
+- Add option to auto-sort when indexing is finished
+- Add option to select sorting method
+- Add option to recursively index folders?
+- Add main buttons settings to Option Dialog
 - Weird file progression when empty list (videoSorter at least)
 
 ## Suggestions
+- Similar to undo hide, allow putting back moved items to list
 - Add docstrings to functions
-- Option to recursively index folders?
 - Volume info on UI (like a widget to graphically change it)
-- For videos, keys to control position / skip sections
+- For videos, keys/buttons to control position / skip sections
 - Command line arguments (optional config as not positional, optional directory as positional)
 - Multi-action binding
-- Folder infos
-- Copy/paste videos
-- Undo/Redo history list widget
+- Copy videos to clipboard
+- Undo/Redo history list widget/dialog
 - Popup with folder infos / file infos
 
 ## Migration to Qt6
@@ -42,3 +41,4 @@ None
 
 ## Other
 - Reverse search button?
+- Dedup feature?

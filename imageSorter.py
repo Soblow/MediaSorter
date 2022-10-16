@@ -66,8 +66,7 @@ class ImageSorter(MainWindow):
                     self.setFileName(currpath)
                     self.image.rescale()
                     return
-                else:
-                    self.setFileName("File is corrupted (height or width is null)")
+                self.setFileName("File is corrupted (height or width is null)")
             else:
                 self.setFileName("File no longer exists")
             self.nonexist = True

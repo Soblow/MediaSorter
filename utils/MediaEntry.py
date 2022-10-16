@@ -10,3 +10,6 @@ class MediaEntry:
     def __init__(self):
         self.path = None
         self.mime = None
+
+    def __lt__(self, other: "MediaEntry"):
+        return self.path < other.path
