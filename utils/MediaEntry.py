@@ -13,15 +13,10 @@ class MediaEntry:
         self.mime = None
         self.size = -1
 
-    def compareSize(self, other: "MediaEntry"):
+    def getSize(self) -> int:
         if self.size == -1:
-            self.getSize()
-        if other.size == -1:
-            other.getSize()
-        return self.size < other.size
-
-    def getSize(self):
-        self.size = os.stat(self.path).st_size
+            self.size = os.stat(self.path).st_size
+        return self.size
 
     def __lt__(self, other: "MediaEntry"):
         return self.path < other.path

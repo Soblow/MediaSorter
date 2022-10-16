@@ -206,9 +206,9 @@ class MainWindow(QMainWindow):
             elif self.settings.sort_method == SortMethod.nameRev:
                 self.mediaList.sort(reverse=True)
             elif self.settings.sort_method == SortMethod.size:
-                self.mediaList.sort(key=lambda x, y: x.compareSize(y))
+                self.mediaList.sort(key=lambda x: x.getSize())
             elif self.settings.sort_method == SortMethod.sizeDec:
-                self.mediaList.sort(key=lambda x, y: x.compareSize(y), reverse=True)
+                self.mediaList.sort(key=lambda x: x.getSize(), reverse=True)
             self.updateProgress()
             self.updateCurrentMedia()
             self.emptyUndoRedo()
