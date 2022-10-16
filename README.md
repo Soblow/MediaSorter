@@ -33,6 +33,7 @@ In addition, some keys are bound by default to some actions and cannot (yet) be 
 - "+"/"-" will zoom-in
 - "0" will reset zoom to 100%
 - "1" will reset zoom to the original "ideal" ratio
+- "4"/"6" will rotate by 90° left/right the image
 - "Inser" will try to copy the current image to your clipboard 
 
 #### Specific to videoSorter

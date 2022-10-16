@@ -6,7 +6,7 @@ Module providing a QLabel-herited class with zoom support, which ensures respect
 import logging
 
 from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtGui import QPixmap, QMovie, QImage
+from PyQt5.QtGui import QPixmap, QMovie, QImage, QTransform
 from PyQt5.QtWidgets import QLabel, QSizePolicy, QWidget
 
 
@@ -54,6 +54,18 @@ class QConstantRatioImage(QLabel):
             self.rescale()
             return True
         return False
+
+    def rotate(self, trigonometric=False):
+        if not self.myPixmap:
+            return
+        rotMatrix = QTransform()
+        if trigonometric:
+            rotMatrix.rotate(90)
+        else:
+            rotMatrix.rotate(-90)
+        self.myPixmap = self.myPixmap.transformed(rotMatrix)
+        self.setPixmap(self.myPixmap)
+        self.rescale()
 
     def resetZoom(self):
         self.zoomPosition = 0

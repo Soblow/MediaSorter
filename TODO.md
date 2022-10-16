@@ -8,13 +8,13 @@ None
   - An option to autosort once sorting is done
   - Option to select sorting method
   - A menu option to sort list
-- Options menu (history size, main buttons...)
+- Options menu (main buttons...)
 - Weird file progression when empty list (videoSorter at least)
 
 ## Suggestions
 - Add docstrings to functions
 - Option to recursively index folders?
-- Volume info on UI (like a widget to graphicaly change it)
+- Volume info on UI (like a widget to graphically change it)
 - For videos, keys to control position / skip sections
 - Command line arguments (optional config as not positional, optional directory as positional)
 - Multi-action binding
@@ -22,7 +22,6 @@ None
 - Copy/paste videos
 - Undo/Redo history list widget
 - Popup with folder infos / file infos
-- Rotate images?
 
 ## Migration to Qt6
 - Required for some new features
@@ -37,7 +36,7 @@ None
 - Movable "containers" with config, status, view, infos...
 
 ## Gallery
-- Display all images as a galery
+- Display all images as a gallery
 - Allow to select them
 - Same onekey-oneaction mecanic
 

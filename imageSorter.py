@@ -131,6 +131,10 @@ class ImageSorter(MainWindow):
             self.image.resetZoom()
         elif act == "zoomRatio":
             self.image.originalRatio()
+        elif act == "rotateLeft":
+            self.image.rotate(True)
+        elif act == "rotateRight":
+            self.image.rotate(False)
         else:
             logging.error("Unsupported action from settings (%s). This should never happen", act)
         event.accept()
