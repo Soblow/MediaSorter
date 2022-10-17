@@ -5,17 +5,19 @@ None
 ## Important
 - Add main buttons settings to Option Dialog
 
-## Suggestions
+## Suggestions (small features)
+- Copy videos to clipboard
+- Switch to QUndo/Redo objects?
+
+## Suggestions (harder to implement)
+- Multi-action binding
 - Similar to undo hide, allow putting back moved items to list
-- Add docstrings to functions
+
+## New UI elements
 - Volume info on UI (like a widget to graphically change it)
 - For videos, keys/buttons to control position / skip sections
-- Command line arguments (optional config as not positional, optional directory as positional)
-- Multi-action binding
-- Copy videos to clipboard
 - Undo/Redo history list widget/dialog
 - Popup with folder infos / file infos
-- Switch to QUndo/Redo objects?
 
 ## Migration to Qt6
 - Required for some new features
@@ -37,3 +39,5 @@ None
 ## Other
 - Reverse search button?
 - Dedup feature?
+- Add docstrings to functions
+- Command line arguments (optional config as not positional, optional directory as positional)
