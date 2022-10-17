@@ -372,19 +372,23 @@ class MainWindow(QMainWindow):
         self.updateCurrentMedia()
 
     def previous(self, move: bool = True):
-        if move:
-            self.mediaListPosition -= 1
-        self.mediaListPosition = max(self.mediaListPosition, 0)
         if len(self.mediaList) == 0:
             self.isActive = False
+        if self.isActive:
+            if move:
+                self.mediaListPosition -= 1
+            self.mediaListPosition = max(self.mediaListPosition, 0)
         self.updateProgress()
         self.updateCurrentMedia()
 
     def next(self, move: bool = True):
-        if move:
-            self.mediaListPosition += 1
-        if self.mediaListPosition >= len(self.mediaList):
-            self.mediaListPosition = len(self.mediaList) - 1
+        if len(self.mediaList) == 0:
+            self.isActive = False
+        if self.isActive:
+            if move:
+                self.mediaListPosition += 1
+            if self.mediaListPosition >= len(self.mediaList):
+                self.mediaListPosition = max(len(self.mediaList) - 1, 0)
         self.updateProgress()
         self.updateCurrentMedia()
 
@@ -396,7 +400,7 @@ class MainWindow(QMainWindow):
 
     def endKey(self):
         if self.isActive:
-            self.mediaListPosition = len(self.mediaList) - 1
+            self.mediaListPosition = max(len(self.mediaList) - 1, 0)
             self.updateProgress()
             self.updateCurrentMedia()
 
@@ -459,11 +463,10 @@ class MainWindow(QMainWindow):
         raise NotImplementedError()
 
     def updateProgress(self):
-        self.progressionLabel.setText(f"{self.mediaListPosition + 1}/{len(self.mediaList)}")
-
-    # def resizeEvent(self, event):
-    # 	self.image.rescale()
-    # 	event.accept()
+        if self.isActive:
+            self.progressionLabel.setText(f"{self.mediaListPosition + 1}/{len(self.mediaList)}")
+        else:
+            self.progressionLabel.setText("0/0")
 
     def zoom(self, factor: QPoint):
         raise NotImplementedError()

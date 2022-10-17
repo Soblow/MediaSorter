@@ -4,7 +4,6 @@ None
 
 ## Important
 - Add main buttons settings to Option Dialog
-- Weird file progression when empty list (videoSorter at least)
 
 ## Suggestions
 - Similar to undo hide, allow putting back moved items to list
