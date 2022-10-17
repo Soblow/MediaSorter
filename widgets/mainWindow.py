@@ -7,13 +7,12 @@ imageSorter & videoSorter herit from this base class
 """
 
 import copy
-import json
 import logging
 import pickle
 import math
 
 from PyQt5.QtCore import Qt, pyqtSlot, QTimer, QPoint, QByteArray, QCoreApplication
-from PyQt5.QtGui import QKeySequence, QGuiApplication, QWheelEvent, QKeyEvent, QCloseEvent
+from PyQt5.QtGui import QGuiApplication, QWheelEvent, QKeyEvent, QCloseEvent
 from PyQt5.QtWidgets import QMainWindow, \
     QAction, QTableWidget, QAbstractItemView, QTableWidgetItem, QFileDialog, QSplitter, QVBoxLayout, QWidget, QLabel, \
     QSizePolicy, QHBoxLayout, QMessageBox
@@ -48,7 +47,7 @@ class MainWindow(QMainWindow):
         self.mediaList = []
         self.path = ".."
         self.configFilePath = ""
-        self.eventsConfig = {"keys": {}}
+        self.bindings = {}
         self.forbiddenKeys = [Qt.Key_Escape]
         self.forbiddenKeys += self.settings.globalKeys.keys()
         self.isActive = False
@@ -325,7 +324,7 @@ class MainWindow(QMainWindow):
             self.openConfig()
 
     def newConfig(self):
-        self.eventsConfig = {"keys": {}}
+        self.bindings = {}
         self.actionsAvailable.setRowCount(1)
         self.actionsAvailable.clearContents()
         self.configFilePath = ""
@@ -333,8 +332,8 @@ class MainWindow(QMainWindow):
         fileDialog.setFileMode(QFileDialog.AnyFile)
         if fileDialog.exec():
             self.configFilePath = fileDialog.selectedFiles()[0]
-            self.statusBar().showMessage(f"Opening new config in file {self.configFilePath}.")
-            logging.info("Opening new config in file %s", self.configFilePath)
+            self.statusBar().showMessage(f"Using new config in file {self.configFilePath}.")
+            logging.info("Using new config in file %s", self.configFilePath)
 
     @pyqtSlot(str)
     def openConfig(self, newPath: str = None):
@@ -342,16 +341,15 @@ class MainWindow(QMainWindow):
             self.configFilePath = newPath
         if self.configFilePath == "":
             return
-        with open(self.configFilePath, 'r', encoding="us-ascii") as configFile:
-            self.eventsConfig = json.load(configFile)
+        self.bindings = BindingsGlobals.loadBindings(self.configFilePath)
+
         self.actionsAvailable.clearContents()
-        self.actionsAvailable.setRowCount(len(self.eventsConfig['keys'].keys()))
+        self.actionsAvailable.setRowCount(len(self.bindings))
         i = 0
-        for key in sorted(self.eventsConfig['keys'].keys()):
-            entry = self.eventsConfig['keys'][key]
-            self.actionsAvailable.setItem(i, 0, QTableWidgetItem(QKeySequence(Qt.Key(key)).toString()))
-            newEntry = QTableWidgetItem("")
-            newEntry.setText(f"{entry['action']} to {entry['path']}")
+        for key in sorted(self.bindings.keys()):
+            action = self.bindings[key]
+            self.actionsAvailable.setItem(i, 0, QTableWidgetItem(action.keystr))
+            newEntry = QTableWidgetItem(f"{action.name} to {action.path}")
             self.actionsAvailable.setItem(i, 1, newEntry)
             i += 1
         self.actionsAvailable.resizeRowsToContents()
@@ -360,7 +358,7 @@ class MainWindow(QMainWindow):
         _temp = QMessageBox.about(self, "About", "This project was made by Soblow. Available under license provided in LICENSE.md")
 
     def editConfig(self):
-        _temp = BindingsWindow(self, copy.deepcopy(self.eventsConfig), self.configFilePath, self.forbiddenKeys)
+        _temp = BindingsWindow(self, copy.deepcopy(self.bindings), self.configFilePath, self.forbiddenKeys)
 
     def jumpTo(self):
         _temp = QJumpWindow(self, maxNumber=len(self.mediaList), curPos=self.mediaListPosition + 1)
@@ -417,7 +415,6 @@ class MainWindow(QMainWindow):
             else:
                 self.statusBar().showMessage(f"Failed to delete file {self.mediaList[self.mediaListPosition].path}.")
 
-
     def moveFile(self, newDirectory: str):
         if self.isActive:
             self.statusBar().showMessage(f"Moving file to {newDirectory}.")
@@ -456,8 +453,8 @@ class MainWindow(QMainWindow):
         # Won't make it mandatory to implement if it isn't possible to put file in clipboard (videos...)
         logging.info("Copying to clipboard isn't available on this mode")
 
-    def nothing(self):
-        logging.info('"Nothing" callback was called, and it did nothing else than printing this message')
+    # def nothing(self):
+    #     logging.info('"Nothing" callback was called, and it did nothing else than printing this message')
 
     def updateCurrentMedia(self):
         raise NotImplementedError()
@@ -509,13 +506,12 @@ class MainWindow(QMainWindow):
             else:
                 logging.error("Unsupported action from settings (%s). This should never happen", act)
             event.accept()
-        elif (str(event.key()) in self.eventsConfig['keys']) and self.isActive:
-            action = self.eventsConfig['keys'][str(event.key())]["action"]
-            if BindingsGlobals.BindingActionType.fileModification in BindingsGlobals.bindingActions[action]:
-                if action == "move":
-                    self.moveFile(self.eventsConfig['keys'][str(event.key())]['path'])
-                elif action == "copy":
-                    self.copyFile(self.eventsConfig['keys'][str(event.key())]['path'])
-            else:
-                self.nothing()
+        elif (event.key() in self.bindings.keys()) and self.isActive:
+            action = self.bindings[event.key()]
+            if isinstance(action, BindingsGlobals.Move_SorterAction):
+                self.moveFile(action.path)
+            elif isinstance(action, BindingsGlobals.Copy_SorterAction):
+                self.copyFile(action.path)
+            # else:
+            #     self.nothing()
             event.accept()

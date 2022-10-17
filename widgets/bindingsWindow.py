@@ -4,12 +4,13 @@ bindingsWindow
 Module provinding the bindings editing window
 """
 
-import json
 import logging
 
-from PyQt5.QtCore import pyqtSignal, pyqtSlot
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
+from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QFileDialog, QWidget
 
+from utils import BindingsGlobals
 from widgets.bindingsListWidget import BindingsListWidget
 from widgets.createBindingDialog import CreateBindingDialog
 
@@ -21,7 +22,8 @@ class BindingsWindow(QDialog):
     validate = pyqtSignal(str)
     refreshList = pyqtSignal(dict)
 
-    def __init__(self, parent: QWidget, bindings: dict, configPath: str, forbiddenKeys: list = None):
+    def __init__(self, parent: QWidget, bindings: dict[int, BindingsGlobals.SorterAction], configPath: str,
+                 forbiddenKeys: list = None):
         super().__init__(parent)
         if forbiddenKeys is None:
             forbiddenKeys = []
@@ -64,34 +66,33 @@ class BindingsWindow(QDialog):
     @pyqtSlot()
     def validating(self):
         if self.configPath != "":
-            self.writeConfig(self.configPath)
+            BindingsGlobals.saveBindings(self.configPath, self.bindings)
         else:
             fileDialog = QFileDialog()
             fileDialog.setFileMode(QFileDialog.AnyFile)
             if fileDialog.exec():
                 self.configPath = fileDialog.selectedFiles()[0]
-                self.writeConfig(self.configPath)
+                BindingsGlobals.saveBindings(self.configPath, self.bindings)
 
         self.validate.emit(self.configPath)
         super().close()
 
-    def writeConfig(self, path: str):
-        logging.info("Writing configuration to %s", path)
-        with open(path, "w", encoding="us-ascii") as file:
-            json.dump(self.bindings, file)
-
     def addBinding(self):
-        _bindingWindow = CreateBindingDialog(self, forbiddenKeys=self.forbiddenKeys + [int(e) for e in self.bindings['keys']])
+        _bindingWindow = CreateBindingDialog(self, forbiddenKeys=self.forbiddenKeys +
+                                                                 [int(e) for e in self.bindings.keys()])
 
     def addBindingCallback(self, keyAdded: int):
-        if keyAdded != 0:
-            strKey = str(keyAdded)
-            if strKey in self.bindings['keys']:
-                logging.warning("Can't add this binding as key is already registered")
-            else:
-                self.bindings['keys'][strKey] = {}
-                self.bindings['keys'][strKey]["action"] = "nothing"
-                self.bindings['keys'][strKey]["path"] = ""
-                self.refreshList.emit(self.bindings)
-        else:
+        if keyAdded == 0:
             logging.info("No key was selected, assuming cancel.")
+            return
+
+        if keyAdded in self.bindings:
+            logging.warning("Can't add this action as this key (%s) is already registered", keyAdded)
+            return
+
+        newAction = BindingsGlobals.SorterAction()
+        newAction.path = ""
+        newAction.keystr = QKeySequence(Qt.Key(keyAdded)).toString()
+        self.bindings[keyAdded] = newAction
+        self.refreshList.emit(self.bindings)
+        logging.info("Key %s (%s) added with empty action", keyAdded, newAction.keystr)

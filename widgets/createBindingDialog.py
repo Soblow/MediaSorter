@@ -17,7 +17,7 @@ class CreateBindingDialog(QDialog):
     validate = pyqtSignal(int)
     recording = False
 
-    def __init__(self, parent: QWidget = None, flags: Qt.WindowFlags = Qt.WindowFlags(), forbiddenKeys=None):
+    def __init__(self, parent: QWidget = None, flags: Qt.WindowFlags = Qt.WindowFlags(), forbiddenKeys: list[int] = None):
         super().__init__(parent, flags)
         if forbiddenKeys is None:
             forbiddenKeys = []

@@ -3,6 +3,7 @@ changeActionWidget
 
 Module providing ChangeAction dialog
 """
+import copy
 
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit, QComboBox, QLabel, \
@@ -17,11 +18,11 @@ class ChangeAction(QDialog):
     Dialog window allowing to edit what a biding is doing
     """
 
-    def __init__(self, parent: QWidget, actId: int, act: str, path: str):
+    def __init__(self, parent: QWidget, actId: int, act: BindingsGlobals.SorterAction):
         super().__init__(parent)
-        self.act = act
-        self.path = path
         self.actId = actId
+        self.act = act
+        self.newact = copy.deepcopy(act)
 
         self.mainLayout = QVBoxLayout()
         self.buttonLayout = QHBoxLayout()
@@ -51,13 +52,13 @@ class ChangeAction(QDialog):
         self.pathLayout.addWidget(self.pathLineEdit)
         self.pathLayout.addWidget(self.pathButton)
 
-        for e in sorted(BindingsGlobals.bindingActions.keys()):
+        for e in sorted(BindingsGlobals.AVAILABLESORTERACTIONS.keys()):
             self.actChoose.addItem(e)
 
-        self.pathLineEdit.setText(self.path)
+        self.pathLineEdit.setText(self.act.path)
         self.pathLineEdit.setEnabled(False)
 
-        self.actChoose.setCurrentText(self.act)
+        self.actChoose.setCurrentText(self.act.name)
 
         self.validateButton.clicked.connect(self.validate)
         self.cancelButton.clicked.connect(self.close)
@@ -65,22 +66,25 @@ class ChangeAction(QDialog):
         self.actChoose.currentTextChanged.connect(self.chooseAct)
 
     def validate(self):
-        self.parentWidget().editAction(self.actId, self.act, self.path)
+        self.parentWidget().editAction(self.actId, self.newact)
         self.close()
 
     @pyqtSlot(str)
     def chooseAct(self, newAct: str):
-        self.act = newAct
-        if BindingsGlobals.bindingActions[self.act] != BindingsGlobals.BindingActionType.fileModification:
-            self.path = ""
-            self.pathLineEdit.setText(self.path)
+        tmpAct = BindingsGlobals.AVAILABLESORTERACTIONS[newAct]()
+        tmpAct.path = self.newact.path
+        tmpAct.keystr = self.newact.keystr
+        self.newact = tmpAct
+        if newAct == BindingsGlobals.SorterAction.name:
+            self.newact.path = ""
+        self.pathLineEdit.setText(self.newact.path)
 
     @pyqtSlot()
     def choosePath(self):
         rez = fsUtils.chooseDirectory(self)
         if rez[0]:
-            self.path = rez[1]
-            self.pathLineEdit.setText(self.path)
+            self.newact.path = rez[1]
+            self.pathLineEdit.setText(self.newact.path)
         else:
-            self.path = ""
+            self.newact.path = ""
             self.pathLineEdit.setText("")
