@@ -16,6 +16,7 @@ None
 - Copy videos to clipboard
 - Undo/Redo history list widget/dialog
 - Popup with folder infos / file infos
+- Switch to QUndo/Redo objects?
 
 ## Migration to Qt6
 - Required for some new features

@@ -4,8 +4,8 @@ SettingsDialog
 Module providing a dialog window to modify MediaSorter's settings
 """
 from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtWidgets import QDialog, QWidget, QTabWidget, QVBoxLayout, QHBoxLayout, QPushButton, QSpinBox, QLabel, \
-    QDoubleSpinBox, QCheckBox, QComboBox
+from PyQt5.QtWidgets import QDialog, QWidget, QTabWidget, QVBoxLayout, QHBoxLayout, QPushButton, QSpinBox, \
+    QDoubleSpinBox, QCheckBox, QComboBox, QFormLayout, QGroupBox
 
 from utils.Settings import Settings, SortMethod
 
@@ -27,13 +27,17 @@ class SettingsDialog(QDialog):
 
         self.widgetGlobal = QWidget()
         self.layoutGlobal = QVBoxLayout()
+        self.layoutGlobalGlobal = QFormLayout()
+        self.widgetIndexing = QGroupBox("Indexing")
+        self.layoutIndexing = QFormLayout()
         self.widgetImage = QWidget()
-        self.layoutImage = QVBoxLayout()
+        self.layoutImage = QFormLayout()
         self.widgetVideo = QWidget()
-        self.layoutVideo = QVBoxLayout()
+        self.layoutVideo = QFormLayout()
 
         self.global_historyLength = QSpinBox()
-        self.video_volume = QSpinBox()
+        self.global_autosort = QCheckBox()
+        self.global_sort_method = QComboBox()
         self.global_indexing_async = QCheckBox()
         self.global_indexing_threads = QSpinBox()
         self.global_indexing_refreshPeriod = QSpinBox()
@@ -41,8 +45,8 @@ class SettingsDialog(QDialog):
         self.global_indexing_batchTime = QCheckBox()
         self.global_indexing_batchTimeLimit = QDoubleSpinBox()
         self.global_indexing_recursive = QCheckBox()
-        self.global_autosort = QCheckBox()
-        self.global_sort_method = QComboBox()
+
+        self.video_volume = QSpinBox()
 
         self.initUI()
 
@@ -54,60 +58,31 @@ class SettingsDialog(QDialog):
         self.mainWidget.addTab(self.widgetImage, "ImageSorter")
         self.mainWidget.addTab(self.widgetVideo, "VideoSorter")
         self.widgetGlobal.setLayout(self.layoutGlobal)
+        self.widgetIndexing.setLayout(self.layoutIndexing)
         self.widgetImage.setLayout(self.layoutImage)
         self.widgetVideo.setLayout(self.layoutVideo)
+        self.layoutGlobal.addLayout(self.layoutGlobalGlobal)
+        self.layoutGlobal.addWidget(self.widgetIndexing)
 
-        layout = QHBoxLayout()
-        self.layoutGlobal.addLayout(layout)
-        layout.addWidget(QLabel("Undo/Redo history length"))
-        layout.addWidget(self.global_historyLength)
-        layout = QHBoxLayout()
-        self.layoutGlobal.addLayout(layout)
-        layout.addWidget(QLabel("Use Async indexing, highly recommended especially on slow storage/huge folders (Default: True)"))
-        layout.addWidget(self.global_indexing_async)
-        layout = QHBoxLayout()
-        self.layoutGlobal.addLayout(layout)
-        layout.addWidget(QLabel("Set amount of threads for async indexing (-1/0 means half available cores)"))
-        layout.addWidget(self.global_indexing_threads)
-        layout = QHBoxLayout()
-        self.layoutGlobal.addLayout(layout)
-        layout.addWidget(QLabel("Set indexing refresh period (default: 50ms)"))
-        layout.addWidget(self.global_indexing_refreshPeriod)
-        layout = QHBoxLayout()
-        self.layoutGlobal.addLayout(layout)
-        layout.addWidget(QLabel("Set batching size for indexing (default: 50 per call)"))
-        layout.addWidget(self.global_indexing_batchSize)
-        layout = QHBoxLayout()
-        self.layoutGlobal.addLayout(layout)
-        layout.addWidget(QLabel("Enable/Disable batching limit on time rather than amount (default: False)"))
-        layout.addWidget(self.global_indexing_batchTime)
-        layout = QHBoxLayout()
-        self.layoutGlobal.addLayout(layout)
-        layout.addWidget(QLabel("Set batching time limit (default: 0.5s)"))
-        layout.addWidget(self.global_indexing_batchTimeLimit)
-        layout = QHBoxLayout()
-        self.layoutGlobal.addLayout(layout)
-        layout.addWidget(QLabel("Index recursively (default: False)"))
-        layout.addWidget(self.global_indexing_recursive)
-        layout = QHBoxLayout()
-        self.layoutGlobal.addLayout(layout)
-        layout.addWidget(QLabel("Auto-sort list when indexing completes (default: False)"))
-        layout.addWidget(self.global_autosort)
-        layout = QHBoxLayout()
-        self.layoutGlobal.addLayout(layout)
-        layout.addWidget(QLabel("Select sorting method (default: none)"))
-        layout.addWidget(self.global_sort_method)
+        self.layoutGlobalGlobal.addRow("Undo/Redo history length", self.global_historyLength)
+        self.layoutGlobalGlobal.addRow("Auto-sort list when indexing completes (default: False)", self.global_autosort)
+        self.layoutGlobalGlobal.addRow("Select sorting method (default: none)", self.global_sort_method)
+        self.layoutIndexing.addRow("Use Async indexing, highly recommended especially on slow storage/huge folders ("
+                                 "Default: True)", self.global_indexing_async)
+        self.layoutIndexing.addRow("Set amount of threads for async indexing (-1/0 means half available cores)",
+                                 self.global_indexing_threads)
+        self.layoutIndexing.addRow("Set indexing refresh period (default: 50ms)", self.global_indexing_refreshPeriod)
+        self.layoutIndexing.addRow("Set batching size for indexing (default: 50 items)", self.global_indexing_batchSize)
+        self.layoutIndexing.addRow("Enable/Disable batching limit on time rather than amount (default: False)",
+                                 self.global_indexing_batchTime)
+        self.layoutIndexing.addRow("Set batching time limit (default: 0.5s)", self.global_indexing_batchTimeLimit)
+        self.layoutIndexing.addRow("Index recursively (default: False)", self.global_indexing_recursive)
 
-        layout = QHBoxLayout()
-        self.layoutVideo.addLayout(layout)
-        layout.addWidget(QLabel("Video volume"))
-        layout.addWidget(self.video_volume)
+        self.layoutVideo.addRow("Video volume", self.video_volume)
 
         self.buttonLayout.addWidget(self.validateButton)
         self.buttonLayout.addWidget(self.cancelButton)
 
-        self.video_volume.setMinimum(0)
-        self.video_volume.setMaximum(100)
         self.global_historyLength.setMinimum(5)
         self.global_historyLength.setMaximum(100)
         self.global_indexing_threads.setMinimum(-1)
@@ -124,10 +99,12 @@ class SettingsDialog(QDialog):
         self.global_sort_method.addItem("size (increasing)", SortMethod.size)
         self.global_sort_method.addItem("size (decreasing)", SortMethod.sizeDec)
 
+        self.video_volume.setMinimum(0)
+        self.video_volume.setMaximum(100)
+
         self.cancelButton.clicked.connect(self.reject)
         self.validateButton.clicked.connect(self.accept)
 
-        self.video_volume.setValue(self.settings.volume)
         self.global_historyLength.setValue(self.settings.historyLength)
         self.global_indexing_async.setChecked(self.settings.indexing_async)
         self.global_indexing_threads.setValue(self.settings.indexing_threads)
@@ -139,8 +116,9 @@ class SettingsDialog(QDialog):
         self.global_autosort.setChecked(self.settings.autosort)
         self.global_sort_method.setCurrentIndex(self.settings.sort_method.value)
 
+        self.video_volume.setValue(self.settings.volume)
+
     def accept(self) -> None:
-        self.settings.volume = self.video_volume.value()
         self.settings.historyLength = self.global_historyLength.value()
         self.settings.indexing_async = self.global_indexing_async.isChecked()
         self.settings.indexing_threads = self.global_indexing_threads.value()
@@ -151,4 +129,6 @@ class SettingsDialog(QDialog):
         self.settings.indexing_recursive = self.global_indexing_recursive.isChecked()
         self.settings.autosort = self.global_autosort.isChecked()
         self.settings.sort_method = SortMethod(self.global_sort_method.currentIndex())
+
+        self.settings.volume = self.video_volume.value()
         super().accept()
