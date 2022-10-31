@@ -50,6 +50,7 @@ class VideoSorter(MainWindow):
         self.isActive = False
         self.nonexist = False
         self.show()
+        self.prepareMediaList()
 
     def initUI(self):
         super().initUI()
@@ -63,6 +64,7 @@ class VideoSorter(MainWindow):
         self.videoPlayer.positionChanged.connect(self.positionChanged)
         self.videoPlayer.durationChanged.connect(self.durationChanged)
         self.videoPlayer.error.connect(self.handleError)
+        # self.videoWidget.setVisible(False)
 
         super().adjustSplitter()
 
@@ -78,11 +80,12 @@ class VideoSorter(MainWindow):
             absPath = os.path.abspath(relPath)
             if os.path.exists(absPath):
                 self.isActive = True
-                self.videoWidget.show()
+                # self.videoWidget.setVisible(True)
                 self.setFileName(relPath)
                 self.videoPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(absPath)))
                 self.playButton.setEnabled(True)
-                self.play()
+                self.videoPlayer.play()
+                self.statusBar().showMessage("Playing.")
                 return
             self.setFileName("File no longer exists")
             logging.info("File no longer exists")
@@ -91,7 +94,8 @@ class VideoSorter(MainWindow):
             logging.info("No acceptable file found")
         self.isActive = False
         self.videoPlayer.pause()
-        self.videoWidget.hide()
+        self.statusBar().showMessage("Pausing.")
+        # self.videoWidget.setVisible(False)
 
     def play(self):
         if self.isActive:
