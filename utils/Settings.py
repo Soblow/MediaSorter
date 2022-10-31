@@ -18,6 +18,10 @@ class SortMethod(enum.Enum):
     nameRev = 2  # Name (reverse alphabetical)
     size = 3  # File Size (increasing)
     sizeDec = 4  # File Size (decreasing)
+    creatDate = 5  # Date of creation
+    creatDateDec = 6  # Date of creation (reverse)
+    modifDate = 7  # Date of modification
+    modifDateDec = 8  # Date of modification (reverse)
 
 class Settings:
     """

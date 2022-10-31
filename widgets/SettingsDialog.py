@@ -98,6 +98,10 @@ class SettingsDialog(QDialog):
         self.global_sort_method.addItem("name (reverse)", SortMethod.nameRev)
         self.global_sort_method.addItem("size (increasing)", SortMethod.size)
         self.global_sort_method.addItem("size (decreasing)", SortMethod.sizeDec)
+        self.global_sort_method.addItem("creation date (increasing)", SortMethod.creatDate)
+        self.global_sort_method.addItem("creation date (decreasing)", SortMethod.creatDateDec)
+        self.global_sort_method.addItem("modification date (increasing)", SortMethod.modifDate)
+        self.global_sort_method.addItem("modification date (decreasing)", SortMethod.modifDateDec)
 
         self.video_volume.setMinimum(0)
         self.video_volume.setMaximum(100)

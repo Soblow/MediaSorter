@@ -3,7 +3,7 @@
 mainWindow
 
 Module providing the base for creating a Sorter
-imageSorter & videoSorter herit from this base class
+imageSorter & videoSorter inherit from this base class
 """
 
 import copy
@@ -208,6 +208,14 @@ class MainWindow(QMainWindow):
                 self.mediaList.sort(key=lambda x: x.getSize())
             elif self.settings.sort_method == SortMethod.sizeDec:
                 self.mediaList.sort(key=lambda x: x.getSize(), reverse=True)
+            elif self.settings.sort_method == SortMethod.creatDate:
+                self.mediaList.sort(key=lambda x: x.getCreatDate())
+            elif self.settings.sort_method == SortMethod.creatDateDec:
+                self.mediaList.sort(key=lambda x: x.getCreatDate(), reverse=True)
+            elif self.settings.sort_method == SortMethod.modifDate:
+                self.mediaList.sort(key=lambda x: x.getModifDate())
+            elif self.settings.sort_method == SortMethod.modifDateDec:
+                self.mediaList.sort(key=lambda x: x.getModifDate(), reverse=True)
             self.updateProgress()
             self.updateCurrentMedia()
             self.emptyUndoRedo()
@@ -483,7 +491,7 @@ class MainWindow(QMainWindow):
     def keyPressEvent(self, event: QKeyEvent):
         # Note: Please note that events may also be handled by herited classes
         eventKey = event.key()
-        logging.debug("mainWindow : Key pressed %s", eventKey)
+        # logging.debug("mainWindow : Key pressed %s", eventKey)
         if eventKey == Qt.Key_Escape:
             self.close()
             event.accept()
