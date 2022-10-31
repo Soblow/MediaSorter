@@ -84,7 +84,8 @@ class VideoSorter(MainWindow):
                 self.setFileName(relPath)
                 self.videoPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(absPath)))
                 self.playButton.setEnabled(True)
-                self.videoPlayer.play()
+                if self.settings.video_autoplay:
+                    self.videoPlayer.play()
                 self.statusBar().showMessage("Playing.")
                 return
             self.setFileName("File no longer exists")

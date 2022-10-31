@@ -47,6 +47,7 @@ class SettingsDialog(QDialog):
         self.global_indexing_recursive = QCheckBox()
 
         self.video_volume = QSpinBox()
+        self.video_autoplay = QCheckBox()
 
         self.initUI()
 
@@ -79,6 +80,7 @@ class SettingsDialog(QDialog):
         self.layoutIndexing.addRow("Index recursively (default: False)", self.global_indexing_recursive)
 
         self.layoutVideo.addRow("Video volume", self.video_volume)
+        self.layoutVideo.addRow("Auto-play videos", self.video_autoplay)
 
         self.buttonLayout.addWidget(self.validateButton)
         self.buttonLayout.addWidget(self.cancelButton)
@@ -121,6 +123,7 @@ class SettingsDialog(QDialog):
         self.global_sort_method.setCurrentIndex(self.settings.sort_method.value)
 
         self.video_volume.setValue(self.settings.volume)
+        self.video_autoplay.setChecked(self.settings.video_autoplay)
 
     def accept(self) -> None:
         self.settings.historyLength = self.global_historyLength.value()
@@ -135,4 +138,5 @@ class SettingsDialog(QDialog):
         self.settings.sort_method = SortMethod(self.global_sort_method.currentIndex())
 
         self.settings.volume = self.video_volume.value()
+        self.settings.video_autoplay = self.video_autoplay.isChecked()
         super().accept()

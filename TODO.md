@@ -3,8 +3,6 @@
 None
 
 ## Important
-- Enable/Disable autoplay on video load
-- Unify the bindings widgets
 - Add main buttons settings to Option Dialog
   - It may be a good occasion to make a proper "bindings" widget
   - This would allow editing the key bound independently of the action too

@@ -7,7 +7,7 @@ import pickle
 
 from PyQt5.QtCore import Qt, QSize, QSettings, QPoint
 
-CURRENTSETTINGSVERSION = 3
+CURRENTSETTINGSVERSION = 4
 
 class SortMethod(enum.Enum):
     """
@@ -54,6 +54,7 @@ class Settings:
 
         # VideoSorter
         self.volume = 50
+        self.video_autoplay = True
 
     def save(self, size: QSize, pos: QPoint):
         self.settings.beginGroup("MainWindow")
@@ -87,6 +88,7 @@ class Settings:
 
         self.settings.beginGroup("VideoSorter")
         self.settings.setValue("volume", self.volume)
+        self.settings.setValue("video_autoplay", self.video_autoplay)
         self.settings.endGroup()
 
     def restore(self) -> tuple[QSize, QPoint]:
@@ -135,6 +137,7 @@ class Settings:
 
         self.settings.beginGroup("VideoSorter")
         self.volume = self.settings.value("volume", 50, type=int)
+        self.video_autoplay = self.settings.value("video_autoplay", True, type=bool)
         self.settings.endGroup()
 
         logging.getLogger().setLevel(self.logLevel)
